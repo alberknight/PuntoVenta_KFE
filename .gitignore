@@ -1,0 +1,49 @@
+# Visual Studio / .NET
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Salida de compilación
+bin/
+obj/
+publish/
+artifacts/
+out/
+
+# NuGet / paquetes
+packages/
+*.nupkg
+*.snupkg
+
+# IDEs
+.vscode/
+.idea/
+
+# ASP.NET / Razor / archivos estáticos
+wwwroot/**/*.log
+
+# Secretos y configuración local
+secrets.json
+appsettings.*.Local.json
+appsettings.*.Secrets.json
+.env
+
+# Logs y bases de datos
+*.log
+*.db
+*.sqlite
+*.mdf
+
+# Node / frontend
+node_modules/
+
+# Docker
+docker-compose.override.yml
+**/docker-compose.override.yml
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini

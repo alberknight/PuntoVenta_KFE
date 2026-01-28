@@ -1,12 +1,12 @@
-using cafeteriaKFE.Models;
-using cafeteriaKFE.Services;
 using Microsoft.AspNetCore.Mvc;
+using cafeteriaKFE.Services;
+using cafeteriaKFE.Models;
+using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace cafeteriaKFE.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class ProductController : ControllerBase
+    public class ProductController : Controller
     {
         private readonly IProductService _productService;
 
@@ -15,47 +15,89 @@ namespace cafeteriaKFE.Controllers
             _productService = productService;
         }
 
-        [HttpGet]
-        public async Task<ActionResult<List<Product>>> GetAllProducts()
+        // GET: /Product/Index
+        public async Task<IActionResult> Index()
         {
-            return await _productService.GetAllProducts();
+            IList<Product> productList = await _productService.GetAllProducts();
+            return View(productList);
         }
 
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Product>> GetProductById(int id)
+        // GET: /Product/Details/5
+        public async Task<IActionResult> Details(int? id)
         {
-            var product = await _productService.GetProductById(id);
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var product = await _productService.GetProductById(id.Value);
+
             if (product == null)
             {
                 return NotFound();
             }
-            return product;
+
+            return View(product);
         }
 
-        [HttpPost]
-        public async Task<ActionResult<Product>> CreateProduct(Product product)
+        // GET: Product/Edit/5
+        public async Task<IActionResult> Edit(int? id)
         {
-            var newProduct = await _productService.CreateProduct(product);
-            return CreatedAtAction(nameof(GetProductById), new { id = newProduct.ProductId }, newProduct);
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var product = await _productService.GetProductById(id.Value);
+            if (product == null)
+            {
+                return NotFound();
+            }
+            return View(product);
         }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateProduct(int id, Product product)
+        // POST: Product/Edit/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, [Bind("ProductId,Name,BasePrice")] Product product)
         {
             if (id != product.ProductId)
             {
-                return BadRequest();
+                return NotFound();
             }
 
-            await _productService.UpdateProduct(product);
-            return NoContent();
+            if (ModelState.IsValid)
+            {
+                await _productService.UpdateProduct(product);
+                return RedirectToAction(nameof(Index));
+            }
+            return View(product);
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteProduct(int id)
+        // GET: Product/Delete/5
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var product = await _productService.GetProductById(id.Value);
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            return View(product);
+        }
+
+        // POST: Product/Delete/5
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
         {
             await _productService.DeleteProduct(id);
-            return NoContent();
+            return RedirectToAction(nameof(Index));
         }
     }
 }

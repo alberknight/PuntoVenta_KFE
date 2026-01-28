@@ -1,6 +1,18 @@
+using Microsoft.EntityFrameworkCore;
+using cafeteriaKFE.Data;
+using cafeteriaKFE.Services;
+using cafeteriaKFE.Repository;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddDbContext<PosDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+
+builder.Services.AddControllers();
 builder.Services.AddRazorPages();
 
 var app = builder.Build();
@@ -14,13 +26,13 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles();
 
 app.UseRouting();
 
 app.UseAuthorization();
 
-app.MapStaticAssets();
-app.MapRazorPages()
-   .WithStaticAssets();
+app.MapControllers();
+app.MapRazorPages();
 
 app.Run();

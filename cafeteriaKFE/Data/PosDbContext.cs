@@ -2,10 +2,13 @@
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using cafeteriaKFE.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity; // Added
 
 namespace cafeteriaKFE.Data;
 
-public partial class PosDbContext : DbContext
+public partial class PosDbContext : IdentityDbContext<User, IdentityRole<long>, long> // Changed base class
+
 {
     public PosDbContext(DbContextOptions<PosDbContext> options)
         : base(options)
@@ -24,18 +27,16 @@ public partial class PosDbContext : DbContext
 
     public virtual DbSet<ProductType> ProductTypes { get; set; }
 
-    public virtual DbSet<Role> Roles { get; set; }
-
     public virtual DbSet<Size> Sizes { get; set; }
 
     public virtual DbSet<Syrup> Syrups { get; set; }
 
     public virtual DbSet<Temperature> Temperatures { get; set; }
 
-    public virtual DbSet<User> Users { get; set; }
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder); // Call base implementation for Identity tables
+
         modelBuilder.Entity<MilkType>(entity =>
         {
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())", "DF_MilkTypes_CreatedAt");
@@ -100,12 +101,6 @@ public partial class PosDbContext : DbContext
             entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(sysutcdatetime())", "DF_ProductTypes_UpdatedAt");
         });
 
-        modelBuilder.Entity<Role>(entity =>
-        {
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())", "DF_Roles_CreatedAt");
-            entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(sysutcdatetime())", "DF_Roles_UpdatedAt");
-        });
-
         modelBuilder.Entity<Size>(entity =>
         {
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())", "DF_Sizes_CreatedAt");
@@ -124,14 +119,13 @@ public partial class PosDbContext : DbContext
             entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(sysutcdatetime())", "DF_Temperatures_UpdatedAt");
         });
 
+        // Ensure Identity maps to the User table
         modelBuilder.Entity<User>(entity =>
         {
+            entity.ToTable("Users"); // Ensure Identity uses your existing "Users" table name
+            // Existing custom properties
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())", "DF_Users_CreatedAt");
             entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(sysutcdatetime())", "DF_Users_UpdatedAt");
-
-            entity.HasOne(d => d.Role).WithMany(p => p.Users)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Users_Roles");
         });
 
         OnModelCreatingPartial(modelBuilder);

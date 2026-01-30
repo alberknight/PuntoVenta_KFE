@@ -3,6 +3,7 @@ using cafeteriaKFE.Services;
 using cafeteriaKFE.Models;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Authorization;
 
 namespace cafeteriaKFE.Controllers
 {
@@ -16,6 +17,7 @@ namespace cafeteriaKFE.Controllers
         }
 
         // GET: /Product/Index
+        [AllowAnonymous]
         public async Task<IActionResult> Index()
         {
             IList<Product> productList = await _productService.GetAllProducts();

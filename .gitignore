@@ -5,7 +5,7 @@
 *.userosscache
 *.sln.docstates
 
-# Salida de compilación
+# Salida de compilaciï¿½n
 bin/
 obj/
 publish/
@@ -21,10 +21,11 @@ packages/
 .vscode/
 .idea/
 
-# ASP.NET / Razor / archivos estáticos
+# ASP.NET / Razor / archivos estï¿½ticos
 wwwroot/**/*.log
+Migrations/
 
-# Secretos y configuración local
+# Secretos y configuraciï¿½n local
 secrets.json
 appsettings.*.Local.json
 appsettings.*.Secrets.json

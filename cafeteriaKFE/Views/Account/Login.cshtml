@@ -2,24 +2,22 @@
 
 @{
     ViewData["Title"] = "Iniciar Sesión";
-    Layout = "_Layout";
 }
 
 <div class="d-flex justify-content-center align-items-center min-vh-75 py-5">
     <div class="col-12 col-md-8 col-lg-5">
         <div class="card shadow-sm">
-            <div class="card-header bg-primary text-white">
-                <h4 class="mb-0">Iniciar Sesión</h4>
+            <div class="card-header bg-primary text-white text-center">
+                <h4 class="mb-0">Cafeteria KFE</h4>
             </div>
-            <div class="card-body">
-                <p class="text-muted mb-4">Introduce tus credenciales para acceder al sistema.</p>
-
-                <form asp-action="Login" asp-route-returnurl="@ViewData["ReturnUrl"]" method="post" novalidate>
-                    <div asp-validation-summary="All" class="alert alert-danger d-none" role="alert"></div>
+            <div class="card-body p-4">
+                <h5 class="card-title text-center mb-4">Iniciar Sesión</h5>
+                <form asp-action="Login" asp-controller="Account" asp-route-returnurl="@ViewData["ReturnUrl"]" method="post" novalidate>
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
 
                     <div class="mb-3">
                         <label asp-for="Email" class="form-label"></label>
-                        <input asp-for="Email" class="form-control" placeholder="Correo electrónico" />
+                        <input asp-for="Email" class="form-control" placeholder="correo@ejemplo.com" />
                         <span asp-validation-for="Email" class="text-danger small"></span>
                     </div>
 
@@ -30,16 +28,16 @@
                     </div>
 
                     <div class="mb-3 form-check">
-                        <input asp-for="RememberMe" class="form-check-input" id="RememberMe" />
-                        <label class="form-check-label" for="RememberMe">@Html.DisplayNameFor(m => m.RememberMe)</label>
+                        <input asp-for="RememberMe" class="form-check-input" />
+                        <label class="form-check-label" asp-for="RememberMe"></label>
                     </div>
 
-                    <div class="d-grid mb-2">
+                    <div class="d-grid mb-3">
                         <button type="submit" class="btn btn-primary btn-lg">Iniciar Sesión</button>
                     </div>
 
                     <div class="text-center">
-                        <small class="text-muted">¿No tienes una cuenta? <a asp-action="Register">Registrarse</a></small>
+                        <small class="text-muted">¿No tienes una cuenta? <a asp-action="Register">Regístrate aquí</a></small>
                     </div>
                 </form>
             </div>

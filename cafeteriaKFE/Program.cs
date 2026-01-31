@@ -6,7 +6,9 @@ using cafeteriaKFE.Repository;
 using Microsoft.AspNetCore.Identity; // Added for Identity
 using System; // Added for TimeSpan
 using Microsoft.Extensions.DependencyInjection; // Added for CreateScope
-using Microsoft.Extensions.Logging; // Added for logging in seeding
+using System.IO; // Added for Path and DirectoryInfo
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Authorization; // Added for DataProtection
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +18,11 @@ builder.Services.AddDbContext<PosDbContext>(options =>
 
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
+
+// Configure Data Protection to persist keys to the file system
+// This prevents "key not found" errors on app restart for antiforgery tokens etc.
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(builder.Environment.ContentRootPath, "DataProtectionKeys")));
 
 // Configure ASP.NET Core Identity
 builder.Services.AddIdentity<User, IdentityRole<long>>(options =>
@@ -42,6 +49,17 @@ builder.Services.ConfigureApplicationCookie(options =>
 });
 
 builder.Services.AddControllersWithViews();
+
+// Set up a fallback authorization policy.
+// This requires all endpoints to be authorized by default.
+// We can then opt-out of authorization for specific endpoints
+// like Login, Register, etc., by using the [AllowAnonymous] attribute.
+builder.Services.AddAuthorization(options =>
+{
+    options.FallbackPolicy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
+});
 
 var app = builder.Build();
 

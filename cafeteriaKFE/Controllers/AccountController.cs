@@ -2,7 +2,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using cafeteriaKFE.Models;
-using cafeteriaKFE.Data; // Assuming PosDbContext is here
+using cafeteriaKFE.Data;
+using Microsoft.AspNetCore.Authorization; // Assuming PosDbContext is here
 
 namespace cafeteriaKFE.Controllers
 {
@@ -19,13 +20,15 @@ namespace cafeteriaKFE.Controllers
             _signInManager = signInManager;
         }
 
+        [AllowAnonymous]
         [HttpGet]
         public IActionResult Register()
         {
             return View();
         }
 
-        [HttpPost]
+        [AllowAnonymous]
+        [HttpPost] // Re-added [AllowAnonymous] for POST action
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
             if (ModelState.IsValid)
@@ -36,16 +39,20 @@ namespace cafeteriaKFE.Controllers
                     Email = model.Email,
                     Name = model.Name,
                     Lastname = model.Lastname,
+                    PhoneNumber = model.PhoneNumber, // Re-added PhoneNumber assignment
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow,
                     Deleted = false,
-                    //RoleId = _context.Roles.FirstOrDefault(r => r.Name == "Customer")?.RoleId ?? 1 // Assign a default role, e.g., "Customer" or RoleId 1
                 };
 
                 var result = await _userManager.CreateAsync(user, model.Password);
 
                 if (result.Succeeded)
                 {
+                    // Assign the default "Customer" role to new users
+                    // This is a default action, adjust as needed
+                    await _userManager.AddToRoleAsync(user, "Customer");
+
                     await _signInManager.SignInAsync(user, isPersistent: false);
                     return RedirectToAction("Index", "Product"); // Redirect to home or a dashboard
                 }
@@ -58,13 +65,25 @@ namespace cafeteriaKFE.Controllers
             return View(model);
         }
 
+        [AllowAnonymous]
         [HttpGet]
-        public IActionResult Login(string? returnUrl = null)
+        public async Task<IActionResult> Login(string? returnUrl = null) // Changed to async Task<IActionResult>
         {
+            if (User.Identity.IsAuthenticated)
+            {
+                var user = await _userManager.GetUserAsync(User); // Get the currently logged-in user
+                if (user != null && await _userManager.IsInRoleAsync(user, "Admin"))
+                {
+                    return RedirectToAction("Index", "Admin");
+                }
+                return RedirectToAction("Index", "Product");
+            }
+
             ViewData["ReturnUrl"] = returnUrl;
             return View();
         }
 
+        [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> Login(LoginViewModel model, string? returnUrl = null)
         {
@@ -88,13 +107,15 @@ namespace cafeteriaKFE.Controllers
                 }
                 else
                 {
+                    // This error message will be displayed in the view's validation summary
                     ModelState.AddModelError(string.Empty, "Intento de inicio de sesión inválido.");
                 }
             }
             return View(model);
         }
 
-        [HttpPost]
+        [AllowAnonymous]
+        [HttpPost] // Re-added [AllowAnonymous] for POST action
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();

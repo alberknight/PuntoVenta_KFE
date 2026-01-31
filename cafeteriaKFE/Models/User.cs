@@ -18,9 +18,6 @@ public partial class User : IdentityUser<long> // Inherit from IdentityUser<long
     [StringLength(80)]
     public string Lastname { get; set; } = null!;
 
-    [StringLength(30)]
-    public string? Phone { get; set; }
-
     [Precision(0)]
     public DateTime CreatedAt { get; set; }
 

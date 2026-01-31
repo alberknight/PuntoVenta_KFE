@@ -17,7 +17,6 @@ namespace cafeteriaKFE.Controllers
         }
 
         // GET: /Product/Index
-        [AllowAnonymous]
         public async Task<IActionResult> Index()
         {
             IList<Product> productList = await _productService.GetAllProducts();

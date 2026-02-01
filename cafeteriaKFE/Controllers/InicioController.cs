@@ -18,7 +18,6 @@ namespace cafeteriaKFE.Controllers
         }
 
         // GET: /Admin/ or /Admin/Index
-        [HttpGet("Admin/Dashboard")]
         public async Task<IActionResult> Dashboard()
         {
             var users = await _userManager.Users.ToListAsync();

@@ -8,17 +8,18 @@ using System.Threading.Tasks;
 namespace cafeteriaKFE.Controllers
 {
     [Authorize(Roles = "Admin")]
-    public class AdminController : Controller
+    public class InicioController : Controller
     {
         private readonly UserManager<User> _userManager;
 
-        public AdminController(UserManager<User> userManager)
+        public InicioController(UserManager<User> userManager)
         {
             _userManager = userManager;
         }
 
         // GET: /Admin/ or /Admin/Index
-        public async Task<IActionResult> Index()
+        [HttpGet("Admin/Dashboard")]
+        public async Task<IActionResult> Dashboard()
         {
             var users = await _userManager.Users.ToListAsync();
             return View(users);

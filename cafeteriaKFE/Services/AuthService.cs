@@ -12,7 +12,7 @@ namespace cafeteriaKFE.Services
 {
     public interface IAuthService
     {
-        Task<ResponseModel> RegisterUser(RegisterResponse model);
+        // Task<ResponseModel> RegisterUser(RegisterResponse model);
         Task<ResponseModel> LoginUser(LoginResponse model);
     }
 
@@ -29,6 +29,7 @@ namespace cafeteriaKFE.Services
             _signInManager = signInManager;
         }
 
+        /*
         public async Task<ResponseModel> RegisterUser(
             RegisterResponse model)
         {
@@ -54,6 +55,7 @@ namespace cafeteriaKFE.Services
 
             return new ResponseModel { success = false, message = "User registration failed.", data = result.Errors };
         }
+        */
 
         public async Task<ResponseModel> LoginUser(LoginResponse model)
         {

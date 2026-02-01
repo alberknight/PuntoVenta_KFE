@@ -26,6 +26,7 @@ namespace cafeteriaKFE.Controllers
             _authService = authService;
         }
 
+        /*
         [AllowAnonymous]
         [HttpGet]
         public IActionResult Register()
@@ -56,6 +57,7 @@ namespace cafeteriaKFE.Controllers
             }
             return View(model);
         }
+        */
 
         [AllowAnonymous]
         [HttpGet]
@@ -66,7 +68,7 @@ namespace cafeteriaKFE.Controllers
                 var user = await _userManager.GetUserAsync(User);
                 if (user != null && await _userManager.IsInRoleAsync(user, "Admin"))
                 {
-                    return RedirectToAction("Index", "Admin");
+                    return RedirectToAction("Dashboard", "Inicio");
                 }
                 return RedirectToAction("Index", "Product");
             }
@@ -88,7 +90,7 @@ namespace cafeteriaKFE.Controllers
                 {
                     if (authResult.data != null && await _userManager.IsInRoleAsync((User)authResult.data, "Admin"))
                     {
-                        return LocalRedirect("/Admin/Index");
+                        return LocalRedirect("/Admin/D");
                     }
                     return LocalRedirect(returnUrl ?? "/Product/Index");
                 }

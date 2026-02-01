@@ -18,6 +18,7 @@ builder.Services.AddDbContext<PosDbContext>(options =>
 
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 // Configure Data Protection to persist keys to the file system
 // This prevents "key not found" errors on app restart for antiforgery tokens etc.
@@ -41,9 +42,9 @@ builder.Services.AddIdentity<User, IdentityRole<long>>(options =>
 // Configure Application Cookie
 builder.Services.ConfigureApplicationCookie(options =>
 {
-    options.LoginPath = "/Account/Login";
-    options.LogoutPath = "/Account/Logout"; // Ensure a logout path is defined
-    options.AccessDeniedPath = "/Account/AccessDenied";
+    options.LoginPath = "/Auth/Login";
+    options.LogoutPath = "/Auth/Logout"; // Ensure a logout path is defined
+    options.AccessDeniedPath = "/Auth/AccessDenied";
     options.SlidingExpiration = true;
     options.ExpireTimeSpan = TimeSpan.FromMinutes(60); // Cookie valid for 60 minutes
 });
@@ -148,7 +149,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Account}/{action=Login}/{id?}");
+    name: "product",
+    pattern: "{controller=Auth}/{action=Login}/{id?}");
 
 app.Run();

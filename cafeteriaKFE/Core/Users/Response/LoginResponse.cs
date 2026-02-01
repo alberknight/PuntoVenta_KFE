@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace cafeteriaKFE.Models
+namespace cafeteriaKFE.Models.Users
 {
-    public class LoginViewModel
+    public class LoginResponse
     {
         [Required(ErrorMessage = "El correo electrónico es requerido.")]
         [EmailAddress(ErrorMessage = "Formato de correo electrónico inválido.")]

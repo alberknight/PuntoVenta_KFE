@@ -1,4 +1,5 @@
-@model cafeteriaKFE.Models.LoginViewModel
+@using cafeteriaKFE.Models.Users
+@model LoginResponse
 
 @{
     ViewData["Title"] = "Iniciar Sesión";
@@ -12,7 +13,7 @@
             </div>
             <div class="card-body p-4">
                 <h5 class="card-title text-center mb-4">Iniciar Sesión</h5>
-                <form asp-action="Login" asp-controller="Account" asp-route-returnurl="@ViewData["ReturnUrl"]" method="post" novalidate>
+                <form asp-action="Login" asp-controller="Auth" asp-route-returnurl="@ViewData["ReturnUrl"]" method="post" novalidate>
                     <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
 
                     <div class="mb-3">

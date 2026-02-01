@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace cafeteriaKFE.Models
+namespace cafeteriaKFE.Models.Users
 {
-    public class RegisterViewModel
+    public class RegisterResponse
     {
         [Required(ErrorMessage = "El nombre es requerido.")]
         [StringLength(80, ErrorMessage = "El nombre no puede exceder los 80 caracteres.")]

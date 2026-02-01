@@ -1,4 +1,5 @@
-@model cafeteriaKFE.Models.RegisterViewModel
+@using cafeteriaKFE.Models.Users
+@model RegisterResponse
 
 @{
 
@@ -13,7 +14,7 @@
             </div>
             <div class="card-body p-4">
                 <h5 class="card-title text-center mb-4">Crear una Cuenta</h5>
-                <form asp-action="Register" asp-controller="Account">
+                <form asp-action="Register" asp-controller="Auth">
                     <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
                     <div class="row">
                         <div class="col-md-6 mb-3">

@@ -17,7 +17,7 @@ namespace cafeteriaKFE.Services
         Task<GetUsersDetailsRequest?> GetUserById(long id); // Changed return type to nullable
         Task<IdentityResult> CreateUser(CreateUserResponse request); // Changed return type
         Task<IdentityResult> UpdateUser(UpdateUserResponse request); // Changed return type
-        Task DeleteUser(string id);
+        Task<IdentityResult> DeleteUser(string id);
         bool UserExists(string id);
     }
     public class UserService : IUserService
@@ -33,7 +33,7 @@ namespace cafeteriaKFE.Services
 
         public async Task<IEnumerable<GetUsersRequest>> GetAllUsers()
         {   
-            return await _userManager.Users.Select(u => new GetUsersRequest
+            return await _userManager.Users.Where(u => !u.Deleted).Select(u => new GetUsersRequest
             {
                 userId = u.Id,
                 email = u.Email,
@@ -62,7 +62,7 @@ namespace cafeteriaKFE.Services
         {
             var newUser = new User
             {
-                UserName = request.email,
+                UserName = request.name,
                 Email = request.email,
                 Name = request.name,
                 LastName = request.lastname,
@@ -92,13 +92,17 @@ namespace cafeteriaKFE.Services
             return IdentityResult.Failed(new IdentityError { Description = "User not found." });
         }
 
-        public async Task DeleteUser(string id)
+        public async Task <IdentityResult> DeleteUser(string id)
         {
             var user = await _userManager.FindByIdAsync(id);
             if (user != null)
             {
-                await _userManager.DeleteAsync(user);
+                user.Deleted = true;
+                user.UpdatedAt = DateTime.UtcNow;
+                await _userManager.UpdateAsync(user);
+                return IdentityResult.Success;
             }
+            return IdentityResult.Failed(new IdentityError { Description = "Error al eliminar" });
         }
 
         public bool UserExists(string id)

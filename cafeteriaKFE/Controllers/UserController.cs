@@ -118,30 +118,22 @@ namespace cafeteriaKFE.Controllers
         }
 
         // GET: User/Delete/5
-        public async Task<IActionResult> Delete(long id) // Keep long id
-        {
-            if (id == 0) // Check for default long value instead of null
-            {
-                return NotFound();
-            }
-
-            var user = await _userService.GetUserById(id); // Returns GetUsersDetailsRequest
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            return View(user);
-        }
-
-        // POST: User/Delete/5
-        [HttpPost, ActionName("Delete")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(string id) // Keep string id for DeleteUser
+        public async Task<IActionResult> Delete(long id)
         {
-            await _userService.DeleteUser(id);
-            return RedirectToAction(nameof(All)); // Changed from Index to All
+            var result = await _userService.DeleteUser(id.ToString());
+
+            if (!result.Succeeded)
+            {
+                TempData["Error"] = "No se pudo eliminar el usuario.";
+                return RedirectToAction(nameof(All));
+            }
+
+            TempData["Success"] = "Usuario eliminado correctamente.";
+            return RedirectToAction(nameof(All));
         }
+
 
         private bool UserExists(string id)
         {

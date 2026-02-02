@@ -90,9 +90,9 @@ namespace cafeteriaKFE.Controllers
                 {
                     if (authResult.data != null && await _userManager.IsInRoleAsync((User)authResult.data, "Admin"))
                     {
-                        return LocalRedirect("/Admin/D");
+                        return LocalRedirect("/Inicio/Dashboard");
                     }
-                    return LocalRedirect(returnUrl ?? "/Product/Index");
+                    return LocalRedirect(returnUrl ?? "/Inicio/PuntoVenta");
                 }
                 
             }

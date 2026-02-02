@@ -5,7 +5,7 @@ using cafeteriaKFE.Models;
 using cafeteriaKFE.Core; // For ResponseModel
 using cafeteriaKFE.Services; // Add this for IAuthService
 using Microsoft.AspNetCore.Authorization;
-using cafeteriaKFE.Models.Users;
+using cafeteriaKFE.Core.Users.Response; // For LoginResponse
 using System.Collections.Generic;
 
 namespace cafeteriaKFE.Controllers

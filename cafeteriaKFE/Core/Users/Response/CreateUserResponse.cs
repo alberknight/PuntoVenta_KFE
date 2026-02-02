@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace cafeteriaKFE.Models.Users
+namespace cafeteriaKFE.Core.Users.Response
 {
     public class CreateUserResponse
     {

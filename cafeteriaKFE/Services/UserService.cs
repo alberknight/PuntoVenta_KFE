@@ -7,16 +7,16 @@ using cafeteriaKFE.Models;
 using Microsoft.AspNetCore.Identity;
 using cafeteriaKFE.Core.Users.Response; // Add this using statement
 using cafeteriaKFE.Core.Users.Request;
-using cafeteriaKFE.Models.Users; // Add this using statement
+
 
 namespace cafeteriaKFE.Services
 {
     public interface IUserService
     {
-        Task<IEnumerable<User>> GetAllUsers();
-        Task<User?> GetUserById(string id); // Changed return type to nullable
-        Task CreateUser(CreateUserResponse request); // Changed parameter type
-        Task UpdateUser(UpdateUserResponse request); // Changed parameter type
+        Task<IEnumerable<GetUsersRequest>> GetAllUsers();
+        Task<GetUsersDetailsRequest?> GetUserById(long id); // Changed return type to nullable
+        Task<IdentityResult> CreateUser(CreateUserResponse request); // Changed return type
+        Task<IdentityResult> UpdateUser(UpdateUserResponse request); // Changed return type
         Task DeleteUser(string id);
         bool UserExists(string id);
     }
@@ -31,45 +31,65 @@ namespace cafeteriaKFE.Services
             _userManager = userManager;
         }
 
-        public async Task<IEnumerable<User>> GetAllUsers()
-        {
-            return await _userManager.Users.ToListAsync();
+        public async Task<IEnumerable<GetUsersRequest>> GetAllUsers()
+        {   
+            return await _userManager.Users.Select(u => new GetUsersRequest
+            {
+                userId = u.Id,
+                email = u.Email,
+                name = u.Name,
+                lastName = u.LastName,
+                createdAt = u.CreatedAt
+            }).ToListAsync();
         }
 
-        public async Task<User?> GetUserById(string id) // Changed return type to nullable
+        public async Task<GetUsersDetailsRequest?> GetUserById(long id) // Changed return type to nullable
         {
-            return await _userManager.FindByIdAsync(id);
+            return await _userManager.Users
+        .Where(u => u.Id == id) // Added WHERE clause
+        .Select(u => new GetUsersDetailsRequest{
+            userId = u.Id, // Changed to long
+            name = u.Name,
+            lastname = u.LastName, // Assuming User.LastName is correct, will map to DTO's lastname
+            email = u.Email,
+            createdAt = u.CreatedAt,
+            phoneNumber = u.PhoneNumber
+        })
+        .FirstOrDefaultAsync();
         }
 
-        public async Task CreateUser(CreateUserResponse request) // Changed parameter type
+        public async Task<IdentityResult> CreateUser(CreateUserResponse request) // Changed return type
         {
             var newUser = new User
             {
                 UserName = request.email,
                 Email = request.email,
                 Name = request.name,
-                Lastname = request.lastname,
+                LastName = request.lastname,
                 PhoneNumber = request.phoneNumber,
                 CreatedAt = System.DateTime.UtcNow,
                 UpdatedAt = System.DateTime.UtcNow,
                 Deleted = false,
                 EmailConfirmed = true // Assuming email is confirmed on creation
+                
             };
-            await _userManager.CreateAsync(newUser, request.password);
+            return await _userManager.CreateAsync(newUser, request.password);
         }
 
-        public async Task UpdateUser(UpdateUserResponse request) // Changed parameter type
+        public async Task <IdentityResult> UpdateUser(UpdateUserResponse request) // Changed parameter type
         {
             var existingUser = await _userManager.FindByIdAsync(request.userId.ToString()); // Assuming UpdateUserResponse has an Id
             if (existingUser != null)
             {
                 existingUser.Email = request.email;
                 existingUser.Name = request.name;
-                existingUser.Lastname = request.lastname;
+                existingUser.LastName = request.lastName;
                 existingUser.PhoneNumber = request.phoneNumber;
                 existingUser.UpdatedAt = System.DateTime.UtcNow;
                 await _userManager.UpdateAsync(existingUser);
+                return IdentityResult.Success;
             }
+            return IdentityResult.Failed(new IdentityError { Description = "User not found." });
         }
 
         public async Task DeleteUser(string id)

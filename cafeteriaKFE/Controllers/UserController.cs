@@ -3,8 +3,7 @@ using cafeteriaKFE.Models;
 using System.Threading.Tasks;
 using cafeteriaKFE.Services;
 using cafeteriaKFE.Core.Users.Request; // Added for request models
-using cafeteriaKFE.Core.Users.Response;
-using cafeteriaKFE.Models.Users; // Added for response models
+using cafeteriaKFE.Core.Users.Response; // Added for response models
 
 namespace cafeteriaKFE.Controllers
 {
@@ -18,21 +17,21 @@ namespace cafeteriaKFE.Controllers
         }
 
         // GET: User
-        public async Task<IActionResult> Index([FromQuery] GetUsersRequest? request = null) // Added request parameter
+        public async Task<IActionResult> All([FromQuery] GetUsersRequest? request = null)
         {
-            var users = await _userService.GetAllUsers(); // Assuming GetAllUsers will return all users for now
+            var users = await _userService.GetAllUsers();
             return View(users);
         }
 
         // GET: User/Details/5
-        public async Task<IActionResult> Details(string id)
+        public async Task<IActionResult> Details(long id) // Keep long id
         {
-            if (id == null)
+            if (id == 0) // Check for default long value instead of null
             {
                 return NotFound();
             }
 
-            var user = await _userService.GetUserById(id);
+            var user = await _userService.GetUserById(id); // Returns GetUsersDetailsRequest
             if (user == null)
             {
                 return NotFound();
@@ -43,89 +42,90 @@ namespace cafeteriaKFE.Controllers
         // GET: User/Create
         public IActionResult Create()
         {
-            return View(new CreateUserResponse()); // Pass an empty CreateUserResponse to the view
+            return View(new CreateUserResponse());
         }
 
         // POST: User/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("email,password,name,lastname,phoneNumber")] CreateUserResponse request) // Changed to CreateUserResponse
+        public async Task<IActionResult> Create(CreateUserResponse request)
         {
-            if (ModelState.IsValid)
-            {
-                await _userService.CreateUser(request); // Use CreateUserResponse
-                return RedirectToAction(nameof(Index));
-            }
+            
+                var result = await _userService.CreateUser(request); // Get IdentityResult
+                if (result.Succeeded)
+                {
+                    return RedirectToAction(nameof(All)); // Changed from Index to All
+                }
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+            
             return View(request);
         }
 
-        // GET: User/Edit/5
-        public async Task<IActionResult> Edit(string id)
+        // GET: User/Update/5
+        public async Task<IActionResult> Update(long id) // Keep long id
         {
-            if (id == null)
+            if (id == 0) // Check for default long value instead of null
             {
                 return NotFound();
             }
 
-            var user = await _userService.GetUserById(id);
+            var user = await _userService.GetUserById(id); // Returns GetUsersDetailsRequest
             if (user == null)
             {
                 return NotFound();
             }
 
-            // Map User to UpdateUserResponse
+            // Map GetUsersDetailsRequest to UpdateUserResponse
             var updateUserResponse = new UpdateUserResponse
             {
-                userId = (int)user.Id,
-                email = user.Email,
-                name = user.Name,
-                lastname = user.Lastname,
-                phoneNumber = user.PhoneNumber
+                userId = user.userId, // Using userId from GetUsersDetailsRequest
+                email = user.email,
+                name = user.name,
+                lastName = user.lastname,
+                phoneNumber = user.phoneNumber
             };
             return View(updateUserResponse);
         }
 
-        // POST: User/Edit/5
+        // POST: User/Update/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string id, [Bind("userId,email,name,lastname,phoneNumber")] UpdateUserResponse request) // Changed to UpdateUserResponse
+        public async Task<IActionResult> Update(
+            long id, // Keep long id
+            UpdateUserResponse request)
         {
-            if (id != request.userId.ToString()) // Compare with request.userId
+            if (id != request.userId) // Compare long with long
             {
                 return NotFound();
             }
 
             if (ModelState.IsValid)
             {
-                try
+                var result = await _userService.UpdateUser(request); // Get IdentityResult
+                if (result.Succeeded)
                 {
-                    await _userService.UpdateUser(request); // Use UpdateUserResponse
+                    return RedirectToAction(nameof(All)); // Changed from Index to All
                 }
-                catch (System.Exception)
+                foreach (var error in result.Errors)
                 {
-                    if (!UserExists(request.userId.ToString())) // Compare with request.userId
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    ModelState.AddModelError(string.Empty, error.Description);
                 }
-                return RedirectToAction(nameof(Index));
             }
             return View(request);
         }
 
         // GET: User/Delete/5
-        public async Task<IActionResult> Delete(string id)
+        public async Task<IActionResult> Delete(long id) // Keep long id
         {
-            if (id == null)
+            if (id == 0) // Check for default long value instead of null
             {
                 return NotFound();
             }
 
-            var user = await _userService.GetUserById(id);
+            var user = await _userService.GetUserById(id); // Returns GetUsersDetailsRequest
             if (user == null)
             {
                 return NotFound();
@@ -137,10 +137,10 @@ namespace cafeteriaKFE.Controllers
         // POST: User/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(string id)
+        public async Task<IActionResult> DeleteConfirmed(string id) // Keep string id for DeleteUser
         {
             await _userService.DeleteUser(id);
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(All)); // Changed from Index to All
         }
 
         private bool UserExists(string id)

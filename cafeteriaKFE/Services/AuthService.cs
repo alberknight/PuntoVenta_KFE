@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using System.Threading.Tasks;
 using System; // For DateTime.UtcNow
 using System.Collections.Generic;
-using cafeteriaKFE.Models.Users; // For List<IdentityError>
+using cafeteriaKFE.Core.Users.Response; // For LoginResponse and RegisterResponse
 // Assuming RegisterResponse and LoginResponse are in cafeteriaKFE.Models, so cafeteriaKFE.Data might not be needed here.
 // using cafeteriaKFE.Data; // Check if this is truly needed.
 

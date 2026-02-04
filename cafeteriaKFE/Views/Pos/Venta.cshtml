@@ -1,0 +1,345 @@
+﻿@{
+    ViewData["Title"] = "Venta";
+}
+
+<div class="container-fluid py-3">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <div>
+            <h3 class="mb-0">Venta</h3>
+            <small class="text-muted">Escanea código de barras o busca por nombre</small>
+        </div>
+
+        <div class="d-flex gap-2">
+            <a asp-controller="Pos" asp-action="Productos" class="btn btn-outline-secondary">
+                Ver lista de productos
+            </a>
+            <a asp-controller="Home" asp-action="Dashboard" class="btn btn-outline-primary">
+                Dashboard
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <!-- Left: Search / Add -->
+        <div class="col-12 col-lg-5 col-xl-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <label class="form-label fw-semibold">Buscar producto</label>
+
+                    <div class="input-group mb-2">
+                        <span class="input-group-text">🔎</span>
+                        <input id="productSearch" type="text" class="form-control"
+                               placeholder="Código de barras o nombre (Enter para agregar)" />
+                        <button id="btnAddMock" class="btn btn-primary" type="button">
+                            Agregar
+                        </button>
+                    </div>
+
+                    <small class="text-muted">
+                        Placeholder: aquí luego conectarás autocompletado / API / DB.
+                    </small>
+
+                    <hr />
+
+                    <div class="d-flex gap-2">
+                        <button id="btnClearCart" class="btn btn-outline-danger w-50" type="button">
+                            Vaciar carrito
+                        </button>
+                        <button id="btnPay" class="btn btn-success w-50" type="button" data-bs-toggle="modal" data-bs-target="#payModal">
+                            Pagar
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mt-3">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted">Subtotal</span>
+                        <span id="subtotal">$0.00</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted">Descuento</span>
+                        <span id="discount">$0.00</span>
+                    </div>
+                    <hr class="my-2" />
+                    <div class="d-flex justify-content-between fs-5 fw-bold">
+                        <span>Total</span>
+                        <span id="total">$0.00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Cart -->
+        <div class="col-12 col-lg-7 col-xl-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white d-flex align-items-center justify-content-between">
+                    <strong>Carrito</strong>
+                    <span class="badge text-bg-secondary" id="itemsCount">0 items</span>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 50%;">Producto</th>
+                                <th class="text-end">Precio</th>
+                                <th class="text-center">Cantidad</th>
+                                <th class="text-end">Importe</th>
+                                <th class="text-end" style="width: 1%;"> </th>
+                            </tr>
+                        </thead>
+                        <tbody id="cartBody">
+                            <tr class="text-muted">
+                                <td colspan="5" class="text-center py-4">
+                                    Aún no hay productos en el carrito.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="card-footer bg-white text-muted small">
+                    Tip: Enter en el buscador para agregar rápido (placeholder).
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Pay Modal -->
+<div class="modal fade" id="payModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Pagar</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Método de pago</label>
+                    <div class="d-flex gap-2">
+                        <button id="payCash" class="btn btn-outline-success w-50" type="button">
+                            Efectivo
+                        </button>
+                        <button id="payCard" class="btn btn-outline-primary w-50" type="button">
+                            Tarjeta
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Cash section -->
+                <div id="cashSection" class="d-none">
+                    <label class="form-label">Recibido</label>
+                    <input id="cashReceived" type="number" class="form-control" placeholder="0.00" />
+                    <div class="mt-2 d-flex justify-content-between">
+                        <span class="text-muted">Cambio</span>
+                        <strong id="cashChange">$0.00</strong>
+                    </div>
+                    <button id="btnCashConfirm" class="btn btn-success w-100 mt-3" type="button">
+                        Confirmar efectivo
+                    </button>
+                </div>
+
+                <!-- Card section -->
+                <div id="cardSection" class="d-none">
+                    <div class="alert alert-info mb-3">
+                        Simulación: procesando pago con tarjeta…
+                    </div>
+
+                    <div id="cardProcessing" class="d-flex align-items-center gap-2">
+                        <div class="spinner-border" role="status" aria-hidden="true"></div>
+                        <div>Procesando…</div>
+                    </div>
+
+                    <div id="cardSuccess" class="alert alert-success d-none mt-3 mb-0">
+                        Pago exitoso ✅
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button id="btnClosePay" type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (() => {
+            // --- Cart mock state ---
+            let cart = [];
+
+            const cartBody = document.getElementById('cartBody');
+            const itemsCount = document.getElementById('itemsCount');
+            const subtotalEl = document.getElementById('subtotal');
+            const discountEl = document.getElementById('discount');
+            const totalEl = document.getElementById('total');
+
+            const productSearch = document.getElementById('productSearch');
+            const btnAddMock = document.getElementById('btnAddMock');
+            const btnClearCart = document.getElementById('btnClearCart');
+
+            // Pay modal elements
+            const payCash = document.getElementById('payCash');
+            const payCard = document.getElementById('payCard');
+            const cashSection = document.getElementById('cashSection');
+            const cardSection = document.getElementById('cardSection');
+
+            const cashReceived = document.getElementById('cashReceived');
+            const cashChange = document.getElementById('cashChange');
+            const btnCashConfirm = document.getElementById('btnCashConfirm');
+
+            const cardProcessing = document.getElementById('cardProcessing');
+            const cardSuccess = document.getElementById('cardSuccess');
+
+            function money(n) {
+                return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(n);
+            }
+
+            function calcTotals() {
+                const sub = cart.reduce((acc, i) => acc + i.price * i.qty, 0);
+                const discount = 0; // placeholder
+                const total = sub - discount;
+
+                subtotalEl.textContent = money(sub);
+                discountEl.textContent = money(discount);
+                totalEl.textContent = money(total);
+
+                itemsCount.textContent = `${cart.reduce((a, i) => a + i.qty, 0)} items`;
+                return { sub, discount, total };
+            }
+
+            function renderCart() {
+                if (cart.length === 0) {
+                    cartBody.innerHTML = `
+                        <tr class="text-muted">
+                            <td colspan="5" class="text-center py-4">Aún no hay productos en el carrito.</td>
+                        </tr>`;
+                    calcTotals();
+                    return;
+                }
+
+                cartBody.innerHTML = cart.map((i, idx) => `
+                    <tr>
+                        <td>
+                            <div class="fw-semibold">${i.name}</div>
+                            <div class="text-muted small">SKU/Código: ${i.code}</div>
+                        </td>
+                        <td class="text-end">${money(i.price)}</td>
+                        <td class="text-center">
+                            <div class="btn-group btn-group-sm" role="group">
+                                <button class="btn btn-outline-secondary" data-action="dec" data-idx="${idx}">-</button>
+                                <button class="btn btn-outline-secondary" disabled>${i.qty}</button>
+                                <button class="btn btn-outline-secondary" data-action="inc" data-idx="${idx}">+</button>
+                            </div>
+                        </td>
+                        <td class="text-end fw-semibold">${money(i.price * i.qty)}</td>
+                        <td class="text-end">
+                            <button class="btn btn-outline-danger btn-sm" data-action="remove" data-idx="${idx}">✕</button>
+                        </td>
+                    </tr>
+                `).join('');
+
+                calcTotals();
+            }
+
+            function addMockItem(query) {
+                const q = (query || '').trim();
+                if (!q) return;
+
+                // Placeholder: en tu lógica real aquí buscarás en DB por código/nombre.
+                const code = q.length > 6 ? q.slice(0, 10) : `000${Math.floor(Math.random() * 900) + 100}`;
+                const name = `Producto: ${q}`;
+                const price = 35 + Math.floor(Math.random() * 60);
+
+                const existing = cart.find(x => x.code === code);
+                if (existing) existing.qty += 1;
+                else cart.push({ code, name, price, qty: 1 });
+
+                productSearch.value = '';
+                renderCart();
+            }
+
+            btnAddMock.addEventListener('click', () => addMockItem(productSearch.value));
+            productSearch.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    addMockItem(productSearch.value);
+                }
+            });
+
+            btnClearCart.addEventListener('click', () => {
+                cart = [];
+                renderCart();
+            });
+
+            cartBody.addEventListener('click', (e) => {
+                const btn = e.target.closest('button');
+                if (!btn) return;
+
+                const idx = Number(btn.getAttribute('data-idx'));
+                const action = btn.getAttribute('data-action');
+                if (Number.isNaN(idx) || !action) return;
+
+                if (action === 'inc') cart[idx].qty += 1;
+                if (action === 'dec') cart[idx].qty = Math.max(1, cart[idx].qty - 1);
+                if (action === 'remove') cart.splice(idx, 1);
+
+                renderCart();
+            });
+
+            // Modal payment logic
+            function resetPayUI() {
+                cashSection.classList.add('d-none');
+                cardSection.classList.add('d-none');
+
+                cashReceived.value = '';
+                cashChange.textContent = money(0);
+
+                cardSuccess.classList.add('d-none');
+                cardProcessing.classList.remove('d-none');
+            }
+
+            document.getElementById('payModal').addEventListener('show.bs.modal', () => {
+                resetPayUI();
+            });
+
+            payCash.addEventListener('click', () => {
+                resetPayUI();
+                cashSection.classList.remove('d-none');
+            });
+
+            payCard.addEventListener('click', () => {
+                resetPayUI();
+                cardSection.classList.remove('d-none');
+
+                // Simulación: 4 segundos de "cargando"
+                setTimeout(() => {
+                    cardProcessing.classList.add('d-none');
+                    cardSuccess.classList.remove('d-none');
+                }, 4000);
+            });
+
+            cashReceived.addEventListener('input', () => {
+                const { total } = calcTotals();
+                const received = Number(cashReceived.value || 0);
+                const change = Math.max(0, received - total);
+                cashChange.textContent = money(change);
+            });
+
+            btnCashConfirm.addEventListener('click', () => {
+                // Placeholder: aquí guardarías Order/OrderDetail/Pago en BD
+                alert('Pago en efectivo confirmado (placeholder).');
+            });
+
+            // Init
+            renderCart();
+        })();
+    </script>
+}

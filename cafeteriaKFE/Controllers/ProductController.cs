@@ -100,5 +100,11 @@ namespace cafeteriaKFE.Controllers
             await _productService.DeleteProduct(id);
             return RedirectToAction(nameof(Index));
         }
+
+        [ValidateAntiForgeryToken]
+        public IActionResult SalesReport(DateTime? from, DateTime? to, string mode = "top")
+        {
+            return View("Reports/Sales");
+        }
     }
 }

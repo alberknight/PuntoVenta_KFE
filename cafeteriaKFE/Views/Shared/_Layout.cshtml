@@ -26,7 +26,7 @@
                         @if (User.Identity?.IsAuthenticated == true && User.IsInRole("Admin"))
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Inicio" asp-action="Dashboard">Panel principal</a>
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Dashboard">Panel principal</a>
                             </li>
                         }
                     </ul>

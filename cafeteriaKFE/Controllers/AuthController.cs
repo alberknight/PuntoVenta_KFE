@@ -68,9 +68,9 @@ namespace cafeteriaKFE.Controllers
                 var user = await _userManager.GetUserAsync(User);
                 if (user != null && await _userManager.IsInRoleAsync(user, "Admin"))
                 {
-                    return RedirectToAction("Dashboard", "Inicio");
+                    return RedirectToAction("Dashboard", "Home");
                 }
-                return RedirectToAction("Index", "Product");
+                return RedirectToAction("Venta", "Pos");
             }
 
             ViewData["ReturnUrl"] = returnUrl;
@@ -90,9 +90,9 @@ namespace cafeteriaKFE.Controllers
                 {
                     if (authResult.data != null && await _userManager.IsInRoleAsync((User)authResult.data, "Admin"))
                     {
-                        return LocalRedirect("/Inicio/Dashboard");
+                        return LocalRedirect("/Home/Dashboard");
                     }
-                    return LocalRedirect(returnUrl ?? "/Inicio/PuntoVenta");
+                    return LocalRedirect(returnUrl ?? "/Pos/Venta");
                 }
                 
             }

@@ -1,0 +1,78 @@
+﻿@{
+    ViewData["Title"] = "Reporte de Productos";
+}
+
+<div class="container py-4">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <div>
+            <h3 class="mb-0">Reporte de productos</h3>
+            <small class="text-muted">Más/menos vendidos con filtro por fechas</small>
+        </div>
+
+        <a asp-controller="Home" asp-action="Dashboard" class="btn btn-outline-secondary">
+            Volver al Dashboard
+        </a>
+    </div>
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-body">
+            <form method="get" class="row g-2 align-items-end">
+                <div class="col-12 col-md-3">
+                    <label class="form-label">Tipo</label>
+                    <select name="mode" class="form-select">
+                        <option value="top">Más vendidos</option>
+                        <option value="low">Menos vendidos</option>
+                    </select>
+                </div>
+
+                <div class="col-12 col-md-3">
+                    <label class="form-label">Desde</label>
+                    <input name="from" type="date" class="form-control" />
+                </div>
+
+                <div class="col-12 col-md-3">
+                    <label class="form-label">Hasta</label>
+                    <input name="to" type="date" class="form-control" />
+                </div>
+
+                <div class="col-12 col-md-3 d-flex gap-2">
+                    <button class="btn btn-primary w-100" type="submit">Aplicar</button>
+                    <a asp-controller="Reports" asp-action="Productos" class="btn btn-outline-secondary w-100">
+                        Limpiar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <strong>Resultados</strong>
+            <span class="text-muted small">placeholder</span>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Producto</th>
+                        <th class="text-end">Cantidad</th>
+                        <th class="text-end">Total vendido</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Placeholder: aquí renderizas tu lista -->
+                    <tr class="text-muted">
+                        <td colspan="3" class="text-center py-4">
+                            Aplica filtros para ver resultados.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card-footer bg-white text-muted small">
+            Tip: “Menos vendidos” es útil para detectar productos estancados.
+        </div>
+    </div>
+</div>

@@ -16,6 +16,7 @@ public partial class Product
 
     [StringLength(120)]
     public string Name { get; set; } = null!;
+    public int BarCode { get; set; }
 
     [Column(TypeName = "decimal(10, 2)")]
     public decimal BasePrice { get; set; }

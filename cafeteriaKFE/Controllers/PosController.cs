@@ -1,10 +1,18 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using cafeteriaKFE.Core.Pos.Request;
+using cafeteriaKFE.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace cafeteriaKFE.Controllers
 {
     public class PosController : Controller
     {
+        private readonly IPosService _pos;
+
+        public PosController(IPosService pos)
+        {
+            _pos = pos;
+        }
         /// <summary>
         /// Pantalla principal del Punto de Venta (Cajero)
         /// </summary>
@@ -40,22 +48,32 @@ namespace cafeteriaKFE.Controllers
             return View();
         }
 
-        // -------------------------------------------------
-        // FUTURO (no implementar todavía)
-        // -------------------------------------------------
+        // AJAX: buscar por barcode o nombre
+        // GET /Pos/Search?query=...
+        [HttpGet]
+        public async Task<IActionResult> Search([FromQuery] string query)
+        {
+            var results = await _pos.SearchProductsAsync(query, take: 10);
+            return Ok(results);
+        }
 
-        // [HttpGet]
-        // public IActionResult Search(string query)
-        // {
-        //     // Buscar producto por código o nombre
-        //     // Retornar JSON
-        // }
+        // AJAX: opciones obligatorias (Sizes y MilkTypes)
+        // GET /Pos/Options
+        [HttpGet]
+        public async Task<IActionResult> Options()
+        {
+            var data = await _pos.GetOptionsAsync();
+            return Ok(data);
+        }
 
-        // [HttpPost]
-        // public IActionResult Checkout(CheckoutRequest request)
-        // {
-        //     // Guardar Order + OrderDetail + Payment
-        //     // Transacción
-        // }
+        // AJAX: checkout
+        // POST /Pos/Checkout
+        // Nota: si quieres CSRF aquí, luego agregas antiforgery token en fetch.
+        [HttpPost]
+        public async Task<IActionResult> Checkout([FromBody] CheckoutRequest request)
+        {
+            var result = await _pos.CheckoutAsync(request);
+            return Ok(result);
+        }
     }
 }

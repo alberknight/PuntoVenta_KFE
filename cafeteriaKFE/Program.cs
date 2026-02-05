@@ -1,14 +1,17 @@
-using Microsoft.EntityFrameworkCore;
 using cafeteriaKFE.Data;
 using cafeteriaKFE.Models; // Ensure User model is accessible
-using cafeteriaKFE.Services;
 using cafeteriaKFE.Repository;
-using Microsoft.AspNetCore.Identity; // Added for Identity
-using System; // Added for TimeSpan
-using Microsoft.Extensions.DependencyInjection; // Added for CreateScope
-using System.IO; // Added for Path and DirectoryInfo
-using Microsoft.AspNetCore.DataProtection;
+using cafeteriaKFE.Repository.Catalogs;
+using cafeteriaKFE.Repository.Orders;
+using cafeteriaKFE.Repository.Products;
+using cafeteriaKFE.Services;
 using Microsoft.AspNetCore.Authorization; // Added for DataProtection
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Identity; // Added for Identity
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection; // Added for CreateScope
+using System; // Added for TimeSpan
+using System.IO; // Added for Path and DirectoryInfo
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,10 +19,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<PosDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddScoped<IProductService, ProductService>();
-builder.Services.AddScoped<IProductRepository, ProductRepository>();
+//builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IPosService, PosService>();
+builder.Services.AddScoped<IPosCatalogRepository, PosCatalogRepository>();
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+
 
 // Configure Data Protection to persist keys to the file system
 // This prevents "key not found" errors on app restart for antiforgery tokens etc.

@@ -1,4 +1,4 @@
-using cafeteriaKFE.Models;
+/*using cafeteriaKFE.Models;
 using cafeteriaKFE.Repository;
 
 namespace cafeteriaKFE.Services
@@ -13,9 +13,9 @@ namespace cafeteriaKFE.Services
     }
     public class ProductService : IProductService
     {
-        private readonly IProductRepository _productRepository;
+        private readonly IProductsRepository _productRepository;
 
-        public ProductService(IProductRepository productRepository)
+        public ProductService(IProductsRepository productRepository)
         {
             _productRepository = productRepository;
         }
@@ -46,3 +46,4 @@ namespace cafeteriaKFE.Services
         }
     }
 }
+*/

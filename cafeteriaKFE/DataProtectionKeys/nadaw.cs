@@ -1,14 +1,23 @@
-using cafeteriaKFE.Data;
+/*using cafeteriaKFE.Data;
 using cafeteriaKFE.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace cafeteriaKFE.Repository
 {
-    public class ProductRepository : IProductRepository
+    public interface IProductsRepository
+    {
+        Task<List<Product>> GetAllProducts();
+        Task<Product> GetProductById(int id);
+        Task<Product> CreateProduct(Product product);
+        Task<Product> UpdateProduct(Product product);
+        Task DeleteProduct(int id);
+    }
+
+    public class nadaw : IProductsRepository
     {
         private readonly PosDbContext _context;
 
-        public ProductRepository(PosDbContext context)
+        public nadaw(PosDbContext context)
         {
             _context = context;
         }
@@ -45,3 +54,4 @@ namespace cafeteriaKFE.Repository
         }
     }
 }
+*/

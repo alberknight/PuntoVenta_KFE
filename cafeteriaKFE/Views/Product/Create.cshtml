@@ -1,0 +1,66 @@
+@model cafeteriaKFE.Core.Products.Response.CreateProductResponse
+
+@{
+    ViewData["Title"] = "Crear producto";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h2 class="mb-0">Crear producto</h2>
+        <small class="text-muted">Alta de producto</small>
+    </div>
+
+    <a asp-action="All" class="btn btn-outline-secondary">Volver</a>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <form asp-action="Create" method="post" novalidate>
+            @Html.AntiForgeryToken()
+
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="mb-3">
+                <label asp-for="ProductTypeId" class="form-label"></label>
+                <div class="mb-3">
+                    <label asp-for="ProductTypeId" class="form-label"></label>
+                    <select asp-for="ProductTypeId" asp-items="ViewBag.ProductTypes" class="form-select">
+                        <option value="">Selecciona un tipo</option>
+                    </select>
+                    <span asp-validation-for="ProductTypeId" class="text-danger"></span>
+                </div>
+
+                <span asp-validation-for="ProductTypeId" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Name" class="form-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label asp-for="BarCode" class="form-label"></label>
+                    <input asp-for="BarCode" class="form-control" />
+                    <span asp-validation-for="BarCode" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="BasePrice" class="form-label"></label>
+                    <input asp-for="BasePrice" class="form-control" />
+                    <span asp-validation-for="BasePrice" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="mt-4 d-flex gap-2">
+                <button type="submit" class="btn btn-primary">Guardar</button>
+                <a asp-action="All" class="btn btn-outline-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="../_ValidationScriptsPartial" />
+}

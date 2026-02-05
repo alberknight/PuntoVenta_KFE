@@ -1,111 +1,142 @@
-/*using Microsoft.AspNetCore.Mvc;
+using cafeteriaKFE.Core.Products.Request;
+using cafeteriaKFE.Core.Products.Response;
 using cafeteriaKFE.Services;
-using cafeteriaKFE.Models;
-using System.Threading.Tasks;
-using System.Collections.Generic;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
-namespace cafeteriaKFE.Controllers
+namespace cafeteriaKFE.Controllers;
+
+[Authorize(Roles = "Admin")]
+public sealed class ProductController : Controller
 {
-    public class ProductController : Controller
+    private readonly IProductService _service;
+
+    public ProductController(IProductService service)
     {
-        private readonly IProductService _productService;
-
-        public ProductController(IProductService productService)
-        {
-            _productService = productService;
-        }
-
-        // GET: /Product/Index
-        public async Task<IActionResult> Index()
-        {
-            IList<Product> productList = await _productService.GetAllProducts();
-            return View(productList);
-        }
-
-        // GET: /Product/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var product = await _productService.GetProductById(id.Value);
-
-            if (product == null)
-            {
-                return NotFound();
-            }
-
-            return View(product);
-        }
-
-        // GET: Product/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var product = await _productService.GetProductById(id.Value);
-            if (product == null)
-            {
-                return NotFound();
-            }
-            return View(product);
-        }
-
-        // POST: Product/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ProductId,Name,BasePrice")] Product product)
-        {
-            if (id != product.ProductId)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                await _productService.UpdateProduct(product);
-                return RedirectToAction(nameof(Index));
-            }
-            return View(product);
-        }
-
-        // GET: Product/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var product = await _productService.GetProductById(id.Value);
-            if (product == null)
-            {
-                return NotFound();
-            }
-
-            return View(product);
-        }
-
-        // POST: Product/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            await _productService.DeleteProduct(id);
-            return RedirectToAction(nameof(Index));
-        }
-
-        [ValidateAntiForgeryToken]
-        public IActionResult SalesReport(DateTime? from, DateTime? to, string mode = "top")
-        {
-            return View("Reports/Sales");
-        }
+        _service = service;
     }
+
+    // GET: /Product
+    [HttpGet]
+    public async Task<IActionResult> All()
+    {
+        var list = await _service.GetAllAsync();
+        return View(list);
+    }
+
+    // GET: /Product/Create
+    [HttpGet]
+    public IActionResult Create()
+    {
+        LoadProductTypes();
+        return View();
+    }
+
+
+    // POST: /Product/Create
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Create(CreateProductResponse model)
+    {
+        if (!ModelState.IsValid)
+        {
+            LoadProductTypes(model.ProductTypeId);
+            return View(model);
+        }
+
+        var result = await _service.CreateAsync(model);
+
+        if (result.Succeeded)
+        {
+            TempData["Success"] = "Producto creado correctamente.";
+            return RedirectToAction("All", "Product");
+        }
+
+        foreach (var err in result.Errors)
+            ModelState.AddModelError("", err.Description);
+
+        LoadProductTypes(model.ProductTypeId);
+        return RedirectToAction("All", "Product");
+    }
+
+
+    // GET: /Product/Update/5
+    [HttpGet]
+    public async Task<IActionResult> Update(int id)
+    {
+        var p = await _service.GetByIdAsync(id);
+        if (p is null) return NotFound();
+
+        var vm = new UpdateProductResponse
+        {
+            ProductId = p.ProductId,
+            ProductTypeId = p.ProductTypeId,
+            Name = p.Name,
+            BarCode = p.BarCode,
+            BasePrice = p.BasePrice
+        };
+
+        LoadProductTypes(vm.ProductTypeId);
+        return View("Update", vm);
+    }
+
+
+    // POST: /Product/Edit
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Update(UpdateProductResponse model)
+    {
+        if (!ModelState.IsValid)
+        {
+            LoadProductTypes(model.ProductTypeId);
+            return View("Update", model);
+        }
+
+        var result = await _service.UpdateAsync(model);
+
+        if (result.Succeeded)
+        {
+            TempData["Success"] = "Producto actualizado correctamente.";
+            return RedirectToAction("All", "Product");
+        }
+
+        foreach (var err in result.Errors)
+            ModelState.AddModelError("", err.Description);
+
+        LoadProductTypes(model.ProductTypeId);
+        return RedirectToAction("All", "Product");
+    }
+
+
+    // POST: /Product/Delete/5  (soft delete)
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var result = await _service.SoftDeleteAsync(id);
+
+        if (!result.Succeeded)
+            return NotFound();
+
+        TempData["Success"] = "Producto eliminado correctamente.";
+        return RedirectToAction("All", "Product");
+    }
+    private static readonly (int Id, string Name)[] ProductTypes =
+{
+    (2, "Temperatures"),   // ajusta el texto a como lo quieras mostrar
+    (3, "Syrups"),
+    (4, "Whipped Cream"),
+    (5, "Food")
+};
+
+    private void LoadProductTypes(int? selectedId = null)
+    {
+        ViewBag.ProductTypes = new Microsoft.AspNetCore.Mvc.Rendering.SelectList(
+            ProductTypes.Select(x => new { x.Id, x.Name }),
+            "Id",
+            "Name",
+            selectedId
+        );
+    }
+
 }
-*/

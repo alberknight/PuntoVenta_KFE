@@ -1,6 +1,7 @@
 ﻿using cafeteriaKFE.Core.DTOs;
 using cafeteriaKFE.Core.Pos.Request;
 using cafeteriaKFE.Core.Pos.Response;
+using cafeteriaKFE.Core.Orders.Response;
 using cafeteriaKFE.Repository.Catalogs;
 using cafeteriaKFE.Repository.Orders;
 using Microsoft.AspNetCore.Cors.Infrastructure;
@@ -35,32 +36,83 @@ namespace cafeteriaKFE.Services
 
         public async Task<PosOptionsResponse> GetOptionsAsync()
         {
-            var sizes = await _catalog.GetSizesAsync();
-            var milks = await _catalog.GetMilkTypesAsync();
-
             return new PosOptionsResponse
             {
-                Sizes = sizes,
-                MilkTypes = milks
+                Sizes = await _catalog.GetSizesAsync(),
+                MilkTypes = await _catalog.GetMilkTypesAsync(),
+                Temperatures = await _catalog.GetTemperaturesAsync(),
+                Syrups = await _catalog.GetSyrupsAsync()
             };
         }
 
+        // Si no tienes costo extra de crema, déjalo en 0.
+        private const decimal WHIPPED_CREAM_PRICE = 0m;
+
         public async Task<decimal> CalculateLineTotalAsync(AddLineRequest line)
         {
-            if (line.Quantity <= 0) throw new ArgumentException("Quantity inválida.");
+            if (line.Quantity <= 0)
+                throw new ArgumentException("Quantity inválida.");
 
             var product = await _products.GetBasicByIdAsync(line.ProductId)
                           ?? throw new InvalidOperationException("Producto no existe o está eliminado.");
 
-            var size = await _catalog.GetSizeByIdAsync(line.SizeId)
+            // FOOD: no requiere nada extra
+            if (product.ProductTypeId == 5)
+            {
+                return product.BasePrice * line.Quantity;
+            }
+
+            // NO FOOD: requiere Size y MilkType (como definiste)
+            if (line.SizeId is null || line.MilkTypeId is null)
+                throw new InvalidOperationException("Este producto requiere Size y MilkType.");
+
+            var size = await _catalog.GetSizeByIdAsync(line.SizeId.Value)
                        ?? throw new InvalidOperationException("Size no existe o está eliminado.");
 
-            var milk = await _catalog.GetMilkTypeByIdAsync(line.MilkTypeId)
+            var milk = await _catalog.GetMilkTypeByIdAsync(line.MilkTypeId.Value)
                        ?? throw new InvalidOperationException("MilkType no existe o está eliminado.");
 
-            var unitPrice = product.BasePrice + size.PriceDelta + milk.PriceDelta;
+            decimal unitPrice = product.BasePrice + size.PriceDelta + milk.PriceDelta;
+
+            // ProductType 2: requiere Temperature (normalmente sin costo)
+            if (product.ProductTypeId == 3)
+            {
+                if (line.TemperatureId is null)
+                    throw new InvalidOperationException("Este producto requiere Temperature.");
+
+                var temp = await _catalog.GetTemperatureByIdAsync(line.TemperatureId.Value)
+                           ?? throw new InvalidOperationException("Temperature no existe o está eliminado.");
+
+                // unitPrice += temp.PriceDelta;
+            }
+
+            // ProductType 3: requiere Syrup (puede tener costo)
+            if (product.ProductTypeId == 2)
+            {
+                if (line.SyrupId is null)
+                    throw new InvalidOperationException("Este producto requiere Syrup.");
+
+                var syrup = await _catalog.GetSyrupByIdAsync(line.SyrupId.Value)
+                            ?? throw new InvalidOperationException("Syrup no existe o está eliminado.");
+
+                // Si tu Syrup tiene PriceDelta, lo sumas. Si no, deja 0.
+                unitPrice += syrup.PriceDelta;
+            }
+
+            // ProductType 4: crema batida opcional
+            if (product.ProductTypeId == 4)
+            {
+                var hasWhip = line.HasWhippedCream ?? false;
+                if (hasWhip)
+                {
+                    unitPrice += WHIPPED_CREAM_PRICE;
+                }
+            }
+
             return unitPrice * line.Quantity;
         }
+
+
 
         public async Task<CheckoutResponse> CheckoutAsync(CheckoutRequest request)
         {
@@ -73,19 +125,22 @@ namespace cafeteriaKFE.Services
             decimal subtotal = 0;
 
             // Construimos detalles y calculamos totales
-            var details = new List<OrderDetailCreate>(request.Lines.Count);
+            var details = new List<OrderDetailCreateResponse>(request.Lines.Count);
 
             foreach (var line in request.Lines)
             {
                 var lineTotal = await CalculateLineTotalAsync(line);
                 subtotal += lineTotal;
 
-                details.Add(new OrderDetailCreate
+                details.Add(new OrderDetailCreateResponse
                 {
                     ProductId = line.ProductId,
                     Quantity = line.Quantity,
                     SizeId = line.SizeId,
-                    MilkTypeId = line.MilkTypeId
+                    MilkTypeId = line.MilkTypeId,
+                    TemperatureId = line.TemperatureId,
+                    SyrupId = line.SyrupId,
+                    HasWhippedCream = line.HasWhippedCream ?? false
                 });
             }
 

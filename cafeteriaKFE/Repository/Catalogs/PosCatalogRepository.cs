@@ -11,6 +11,11 @@ namespace cafeteriaKFE.Repository.Catalogs
 
         Task<OptionDto?> GetSizeByIdAsync(int sizeId);
         Task<OptionDto?> GetMilkTypeByIdAsync(int milkTypeId);
+        Task<List<OptionDto>> GetTemperaturesAsync();
+        Task<List<OptionDto>> GetSyrupsAsync();
+        Task<OptionDto?> GetTemperatureByIdAsync(int id);
+        Task<OptionDto?> GetSyrupByIdAsync(int id);
+
     }
 
     public class PosCatalogRepository : IPosCatalogRepository
@@ -73,6 +78,41 @@ namespace cafeteriaKFE.Repository.Catalogs
                     Name = m.Name,
                     PriceDelta = m.PriceDelta
                 })
+                .FirstOrDefaultAsync();
+        }
+        public async Task<List<OptionDto>> GetTemperaturesAsync()
+        {
+            return await _db.Temperatures.AsNoTracking()
+                .Where(t => !t.Deleted)
+                .OrderBy(t => t.Label)
+                .Select(t => new OptionDto { Id = t.TemperatureId, Name = t.Label, PriceDelta = 0 })
+                .ToListAsync();
+        }
+
+        public async Task<OptionDto?> GetTemperatureByIdAsync(int id)
+        {
+            return await _db.Temperatures.AsNoTracking()
+                .Where(t => t.TemperatureId ==id && !t.Deleted)
+                .OrderBy(t => t.Label)
+                .Select(t => new OptionDto { Id = t.TemperatureId, Name = t.Label, PriceDelta = 0 })
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<List<OptionDto>> GetSyrupsAsync()
+        {
+            return await _db.Syrups.AsNoTracking()
+                .Where(s => !s.Deleted)
+                .OrderBy(s => s.Name)
+                .Select(s => new OptionDto { Id = s.SyrupId, Name = s.Name, PriceDelta = s.PriceDelta /* o 0 */ })
+                .ToListAsync();
+        }
+
+        public async Task<OptionDto?> GetSyrupByIdAsync(int id)
+        {
+            return await _db.Syrups.AsNoTracking()
+                .Where(s => s.SyrupId == id && !s.Deleted)
+                .OrderBy(s => s.Name)
+                .Select(s => new OptionDto { Id = s.SyrupId, Name = s.Name, PriceDelta = s.PriceDelta /* o 0 */ })
                 .FirstOrDefaultAsync();
         }
     }

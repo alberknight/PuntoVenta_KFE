@@ -6,5 +6,6 @@
         public int BarCode { get; set; }
         public string Name { get; set; } = null!;
         public decimal BasePrice { get; set; }
+        public int ProductTypeId { get; set; }
     }
 }

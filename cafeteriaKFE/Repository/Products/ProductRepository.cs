@@ -37,7 +37,8 @@ namespace cafeteriaKFE.Repository.Products
                         ProductId = p.ProductId,
                         BarCode = p.BarCode,
                         Name = p.Name,
-                        BasePrice = p.BasePrice
+                        BasePrice = p.BasePrice,
+                        ProductTypeId = p.ProductTypeId
                     })
                     .Take(take)
                     .ToListAsync();
@@ -45,14 +46,17 @@ namespace cafeteriaKFE.Repository.Products
 
             // Si es texto: buscar por nombre
             return await products
-                .Where(p => EF.Functions.Like(p.Name, $"%{query}%"))
+                .Where(p => EF.Functions.Like(
+        EF.Functions.Collate(p.Name, "Latin1_General_CI_AI"),
+        $"%{query}%"))
                 .OrderBy(p => p.Name)
                 .Select(p => new ProductSearchResultDto
                 {
                     ProductId = p.ProductId,
                     BarCode = p.BarCode,
                     Name = p.Name,
-                    BasePrice = p.BasePrice
+                    BasePrice = p.BasePrice,
+                    ProductTypeId = p.ProductTypeId
                 })
                 .Take(take)
                 .ToListAsync();
@@ -67,7 +71,8 @@ namespace cafeteriaKFE.Repository.Products
                     ProductId = p.ProductId,
                     BarCode = p.BarCode,
                     Name = p.Name,
-                    BasePrice = p.BasePrice
+                    BasePrice = p.BasePrice,
+                    ProductTypeId = p.ProductTypeId,
                 })
                 .FirstOrDefaultAsync();
         }

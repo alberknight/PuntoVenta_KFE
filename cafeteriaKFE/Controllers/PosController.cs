@@ -16,7 +16,7 @@ namespace cafeteriaKFE.Controllers
         /// <summary>
         /// Pantalla principal del Punto de Venta (Cajero)
         /// </summary>
-        [Authorize(Roles = "Cashier,Admin")]
+        [Authorize(Roles = "Customer,Admin")]
         public IActionResult Venta()
         {
             // Aquí después cargarás:
@@ -29,7 +29,7 @@ namespace cafeteriaKFE.Controllers
         /// Listado / búsqueda completa de productos
         /// (acceso desde el POS)
         /// </summary>
-        [Authorize(Roles = "Cashier,Admin")]
+        [Authorize(Roles = "Customer,Admin")]
         public IActionResult Productos()
         {
             // Placeholder: más adelante aquí cargarás

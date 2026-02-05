@@ -29,34 +29,6 @@ namespace cafeteriaKFE.Services
             _signInManager = signInManager;
         }
 
-        /*
-        public async Task<ResponseModel> RegisterUser(
-            RegisterResponse model)
-        {
-            var user = new User
-            {
-                UserName = model.Email,
-                Email = model.Email,
-                Name = model.Name,
-                Lastname = model.Lastname,
-                PhoneNumber = model.PhoneNumber,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow,
-                Deleted = false,
-            };
-
-            var result = await _userManager.CreateAsync(user, model.Password);
-
-            if (result.Succeeded)
-            {
-                await _userManager.AddToRoleAsync(user, "Customer");
-                return new ResponseModel { success = true, message = "User registered successfully.", data = user };
-            }
-
-            return new ResponseModel { success = false, message = "User registration failed.", data = result.Errors };
-        }
-        */
-
         public async Task<ResponseModel> LoginUser(LoginResponse model)
         {
             var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
@@ -69,9 +41,31 @@ namespace cafeteriaKFE.Services
                     message = "Login successful.",
                     data = user };
             }
-            return new ResponseModel {
-                success = false,
-                message = "Login failed."};
+            else
+            {
+                string errorMessage;
+                if (result.IsLockedOut)
+                {
+                    errorMessage = "User account locked out.";
+                }
+                else if (result.IsNotAllowed)
+                {
+                    errorMessage = "User not allowed to sign in (e.g., email not confirmed or disabled).";
+                }
+                else if (result.RequiresTwoFactor)
+                {
+                    errorMessage = "Two-factor authentication required.";
+                }
+                else
+                {
+                    errorMessage = "Invalid login attempt. Please check your email and password.";
+                }
+
+                return new ResponseModel {
+                    success = false,
+                    message = errorMessage
+                };
+            }
         }
     }
 }

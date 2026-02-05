@@ -94,6 +94,10 @@ namespace cafeteriaKFE.Controllers
                     }
                     return LocalRedirect(returnUrl ?? "/Pos/Venta");
                 }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, authResult.message ?? "Invalid login attempt.");
+                }
                 
             }
             return View(model);

@@ -10,11 +10,8 @@
         </div>
 
         <div class="d-flex gap-2">
-            <a asp-controller="Pos" asp-action="Productos" class="btn btn-outline-secondary">
+            <a asp-controller="Product" asp-action="Catalog" class="btn btn-outline-secondary">
                 Ver lista de productos
-            </a>
-            <a asp-controller="Home" asp-action="Dashboard" class="btn btn-outline-primary">
-                Dashboard
             </a>
         </div>
     </div>
@@ -154,6 +151,31 @@
                         <label class="form-label">Tipo de leche (MilkType)</label>
                         <select id="cfgMilk" class="form-select"></select>
                     </div>
+                    <!-- Temperature (ProductTypeId = 2) -->
+                    <div id="tempSection" class="mb-3 d-none">
+                        <label class="form-label">Temperatura</label>
+                        <select id="cfgTemp" class="form-select">
+                            <option value="">Selecciona una temperatura</option>
+                        </select>
+                    </div>
+
+                    <!-- Syrup (ProductTypeId = 3) -->
+                    <div id="syrupSection" class="mb-3 d-none">
+                        <label class="form-label">Jarabe</label>
+                        <select id="cfgSyrup" class="form-select">
+                            <option value="">Selecciona un jarabe</option>
+                        </select>
+                    </div>
+
+                    <!-- Whipped Cream (ProductTypeId = 4) -->
+                    <div id="whipSection" class="form-check mb-3 d-none">
+                        <input class="form-check-input" type="checkbox" id="cfgWhip">
+                        <label class="form-check-label" for="cfgWhip">
+                            Con crema batida
+                        </label>
+                    </div>
+
+
 
                     <div class="col-12">
                         <label class="form-label">Cantidad</label>
@@ -250,5 +272,5 @@
 </div>
 
 @section Scripts {
-    <script src="~/js/pos-venta.js"></script>
+    <script src="~/js/pos-venta.js" asp-append-version="true"></script>
 }

@@ -19,9 +19,9 @@ public partial class OrderDetail
 
     public int Quantity { get; set; }
 
-    public int SizeId { get; set; }
+    public int? SizeId { get; set; }
 
-    public int MilkTypeId { get; set; }
+    public int? MilkTypeId { get; set; }
 
     public bool HasWhippedCream { get; set; }
 

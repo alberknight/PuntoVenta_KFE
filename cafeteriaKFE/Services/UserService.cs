@@ -46,8 +46,8 @@ namespace cafeteriaKFE.Services
         public async Task<GetUsersDetailsRequest?> GetUserById(long id) // Changed return type to nullable
         {
             return await _userManager.Users
-        .Where(u => u.Id == id) // Added WHERE clause
-        .Select(u => new GetUsersDetailsRequest{
+            .Where(u => u.Id == id) // Added WHERE clause
+            .Select(u => new GetUsersDetailsRequest{
             userId = u.Id, // Changed to long
             name = u.Name,
             lastname = u.LastName, // Assuming User.LastName is correct, will map to DTO's lastname
@@ -62,7 +62,7 @@ namespace cafeteriaKFE.Services
         {
             var newUser = new User
             {
-                UserName = request.name,
+                UserName = request.email, // FIX: Use email as UserName for consistent Identity behavior
                 Email = request.email,
                 Name = request.name,
                 LastName = request.lastname,
@@ -73,7 +73,23 @@ namespace cafeteriaKFE.Services
                 EmailConfirmed = true // Assuming email is confirmed on creation
                 
             };
-            return await _userManager.CreateAsync(newUser, request.password);
+            var createResult = await _userManager.CreateAsync(newUser, request.password);
+
+            if (createResult.Succeeded)
+            {
+                // Assign a default role, e.g., "Customer"
+                // This role should exist in your database (seeded in Program.cs)
+                var roleResult = await _userManager.AddToRoleAsync(newUser, "Customer"); // ADDED ROLE ASSIGNMENT
+
+                if (!roleResult.Succeeded)
+                {
+                    // If role assignment fails, aggregate the errors
+                    var errors = new List<IdentityError>(createResult.Errors);
+                    errors.AddRange(roleResult.Errors);
+                    return IdentityResult.Failed(errors.ToArray());
+                }
+            }
+            return createResult; // Return the result of user creation (which might now include role errors)
         }
 
         public async Task <IdentityResult> UpdateUser(UpdateUserResponse request) // Changed parameter type

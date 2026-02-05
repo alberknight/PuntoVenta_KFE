@@ -1,18 +1,9 @@
 ﻿using cafeteriaKFE.Data;
 using cafeteriaKFE.Models;
+using cafeteriaKFE.Core.Orders.Response;
 
 namespace cafeteriaKFE.Repository.Orders
 {
-    public class OrderDetailCreate
-    {
-        public int ProductId { get; set; }
-        public int Quantity { get; set; }
-        public int SizeId { get; set; }
-        public int MilkTypeId { get; set; }
-
-        // luego: SyrupId, TemperatureId, HasWhippedCream...
-    }
-
     public interface IOrderRepository
     {
         Task<long> CreateOrderAsync(
@@ -20,7 +11,7 @@ namespace cafeteriaKFE.Repository.Orders
             decimal totalAmount,
             bool isDelivery,
             int paidMethodId,
-            List<OrderDetailCreate> details);
+            List<OrderDetailCreateResponse> details);
     }
 
     public class OrderRepository : IOrderRepository
@@ -37,7 +28,7 @@ namespace cafeteriaKFE.Repository.Orders
             decimal totalAmount,
             bool isDelivery,
             int paidMethodId,
-            List<OrderDetailCreate> details)
+            List<OrderDetailCreateResponse> details)
         {
             if (details.Count == 0)
                 throw new InvalidOperationException("No hay productos para registrar.");
@@ -67,6 +58,9 @@ namespace cafeteriaKFE.Repository.Orders
                 Quantity = d.Quantity,
                 SizeId = d.SizeId,
                 MilkTypeId = d.MilkTypeId,
+                TemperatureId = d.TemperatureId,
+                SyrupId = d.SyrupId,
+                HasWhippedCream = d.HasWhippedCream,
                 CreatedAt = now,
                 UpdatedAt = now,
                 Deleted = false

@@ -1,4 +1,5 @@
 (() => {
+    console.log('pos-venta.js loaded and executing');
     // --------------------------
     // Helpers
     // --------------------------
@@ -34,6 +35,7 @@
     const searchResultsWrap = document.getElementById('searchResultsWrap');
     const searchResults = document.getElementById('searchResults');
     const btnClearResults = document.getElementById('btnClearResults');
+    
 
     const cartBody = document.getElementById('cartBody');
     const itemsCount = document.getElementById('itemsCount');
@@ -56,6 +58,12 @@
     const cfgUnitPrice = document.getElementById('cfgUnitPrice');
     const cfgLineTotal = document.getElementById('cfgLineTotal');
     const btnCfgAdd = document.getElementById('btnCfgAdd');
+    const cfgTemp = document.getElementById('cfgTemp');
+    const cfgSyrup = document.getElementById('cfgSyrup');
+    const cfgWhip = document.getElementById('cfgWhip');
+    const tempSection = document.getElementById('tempSection');
+    const syrupSection = document.getElementById('syrupSection');
+    const whipSection = document.getElementById('whipSection');
 
     // Pay modal
     const payModalEl = document.getElementById('payModal');
@@ -78,6 +86,13 @@
     let optionsCache = null; // { sizes:[], milkTypes:[] }
     let selectedProduct = null; // { productId, barCode, name, basePrice }
 
+    const TYPE_TEMP = 3;
+    const TYPE_SYRUP = 2;
+    const TYPE_WHIP = 4;
+    const FOOD_TYPE_ID = 5; // si ya existe, deja el tuyo
+    const WHIPPED_CREAM_PRICE = 0; // si no tiene costo, 0
+
+
     // --------------------------
     // Cart rendering
     // --------------------------
@@ -93,6 +108,18 @@
         itemsCount.textContent = `${cart.reduce((a, i) => a + i.qty, 0)} items`;
         return { sub, discount, total };
     }
+
+    function applyTypeUI(typeId) {
+        tempSection?.classList.toggle('d-none', typeId !== TYPE_TEMP);
+        syrupSection?.classList.toggle('d-none', typeId !== TYPE_SYRUP);
+        whipSection?.classList.toggle('d-none', typeId !== TYPE_WHIP);
+
+        // reset para no arrastrar valores
+        if (typeId !== TYPE_TEMP && cfgTemp) cfgTemp.selectedIndex = 0;
+        if (typeId !== TYPE_SYRUP && cfgSyrup) cfgSyrup.selectedIndex = 0;
+        if (typeId !== TYPE_WHIP && cfgWhip) cfgWhip.checked = false;
+    }
+
 
     function renderCart() {
         if (cart.length === 0) {
@@ -110,6 +137,11 @@
                     <div class="fw-semibold">${i.name}</div>
                     <div class="text-muted small">
                         BarCode: ${i.barCode} • Size: ${i.sizeName} • Milk: ${i.milkName}
+                        • Size: ${i.sizeName}
+                        • Milk: ${i.milkName}
+                        ${i.temperatureId ? `• Temp: ${i.tempName}` : ''}
+                        ${i.syrupId ? `• Syrup: ${i.syrupName}` : ''}
+                        ${(i.hasWhippedCream !== undefined && i.hasWhippedCream !== null) ? `• Crema: ${i.hasWhippedCream ? 'Sí' : 'No'}` : ''}
                     </div>
                 </td>
                 <td class="text-end">${money(i.unitPrice)}</td>
@@ -194,9 +226,10 @@
 
             // Si solo hay 1, abrimos configuración directo
             if (results.length === 1) {
-                openConfig(results[0]);
+                handleProductSelected(results[0]);
                 return;
             }
+
 
             // Si hay varios: mostrar lista
             showResults(results);
@@ -224,9 +257,12 @@
         if (!btn) return;
 
         const productId = Number(btn.getAttribute('data-product-id'));
-        // Recuperamos el objeto desde el DOM no es ideal; mejor: re-buscar por query y pick.
-        // Para mantenerlo simple, tomamos datos del texto no. Mejor: guarda última lista en memoria:
+        const p = lastSearchResults.find(x => x.productId === productId);
+        if (!p) return;
+
+        handleProductSelected(p);
     });
+
 
     // Guardamos la última lista de resultados para seleccionar bien:
     let lastSearchResults = [];
@@ -235,17 +271,6 @@
         lastSearchResults = list || [];
         originalShowResults(list);
     };
-
-    searchResults.addEventListener('click', (e) => {
-        const btn = e.target.closest('button[data-product-id]');
-        if (!btn) return;
-
-        const productId = Number(btn.getAttribute('data-product-id'));
-        const p = lastSearchResults.find(x => x.productId === productId);
-        if (!p) return;
-
-        openConfig(p);
-    });
 
     // --------------------------
     // Options & Config Modal
@@ -271,14 +296,84 @@
     function updateConfigPrices() {
         if (!selectedProduct) return;
 
+        const typeId = Number(selectedProduct.productTypeId);
         const sizeDelta = getSelectedDelta(cfgSize);
         const milkDelta = getSelectedDelta(cfgMilk);
         const qty = Math.max(1, Number(cfgQty.value || 1));
 
-        const unit = Number(selectedProduct.basePrice) + sizeDelta + milkDelta;
+        let unit = Number(selectedProduct.basePrice) + sizeDelta + milkDelta;
+
+        if (typeId === TYPE_SYRUP) {
+            unit += getSelectedDelta(cfgSyrup);
+        }
+
+        // Type 4: Whipped Cream (costo fijo si aplica)
+        if (typeId === TYPE_WHIP && cfgWhip?.checked) {
+            unit += WHIPPED_CREAM_PRICE;
+        }
+
         cfgUnitPrice.textContent = money(unit);
         cfgLineTotal.textContent = money(unit * qty);
     }
+
+    function isFood(p) {
+        return Number(p.productTypeId) === FOOD_TYPE_ID;
+    }
+
+    async function handleProductSelected(p) {
+        if (!p) return;
+        console.log('handleProductSelected - Product:', p);
+
+        const typeId = Number(p.productTypeId);
+        console.log('handleProductSelected - productTypeId:', typeId);
+
+        // Seguridad: si no viene el tipo, trata como "requiere configuración"
+        if (Number.isNaN(typeId)) {
+            await openConfig(p);
+            return;
+        }
+
+        // FOOD: se agrega directo, sin modal
+        if (typeId === FOOD_TYPE_ID) {
+            addToCart({
+                productId: p.productId,
+                barCode: p.barCode,
+                productTypeId: typeId,
+                name: p.name,
+                basePrice: Number(p.basePrice),
+                unitPrice: Number(p.basePrice),
+                qty: 1,
+
+                // No aplica en Food:
+                sizeId: null,
+                milkTypeId: null,
+                temperatureId: null,
+                syrupId: null,
+                hasWhippedCream: false,
+
+                sizeName: 'N/A',
+                milkName: 'N/A',
+                tempName: 'N/A',
+                syrupName: 'N/A',
+                whipName: 'N/A'
+            });
+
+            // Limpieza UX
+            showResults([]);
+            setSearchError(null);
+            productSearch.value = '';
+            return;
+        }
+
+        // NO FOOD: requiere configuración (Size + Milk + extras según tipo)
+        await openConfig(p);
+
+        // Limpieza UX (opcional, pero deja la pantalla lista para el siguiente escaneo)
+        showResults([]);
+        setSearchError(null);
+        productSearch.value = '';
+    }
+
 
     async function openConfig(product) {
         selectedProduct = product;
@@ -292,10 +387,16 @@
             const opts = await ensureOptionsLoaded();
             fillSelect(cfgSize, opts.sizes || []);
             fillSelect(cfgMilk, opts.milkTypes || []);
+            fillSelect(cfgTemp, opts.temperatures || []);
+            fillSelect(cfgSyrup, opts.syrups || []);
+
+            cfgWhip && (cfgWhip.checked = false);
+            applyTypeUI(Number(product.productTypeId));
 
             cfgQty.value = 1;
 
             updateConfigPrices();
+            console.log('openConfig - About to show configModal');
             configModal.show();
 
             // Limpiamos resultados para no estorbar
@@ -303,38 +404,83 @@
             setSearchError(null);
             productSearch.value = '';
         } catch (e) {
+            console.error('openConfig - Error during modal configuration:', e);
             cfgError.classList.remove('d-none');
-            cfgError.textContent = "No se pudieron cargar opciones (Sizes/MilkTypes). Revisa /Pos/Options.";
+            cfgError.textContent = "No se pudieron cargar/mostrar opciones del modal. Revisa IDs del HTML y /Pos/Options.";
         }
     }
 
     cfgSize.addEventListener('change', updateConfigPrices);
     cfgMilk.addEventListener('change', updateConfigPrices);
     cfgQty.addEventListener('input', updateConfigPrices);
+    cfgTemp && cfgTemp.addEventListener('change', updateConfigPrices);
+    cfgSyrup && cfgSyrup.addEventListener('change', updateConfigPrices);
+    cfgWhip && cfgWhip.addEventListener('change', updateConfigPrices);
+
 
     btnCfgAdd.addEventListener('click', () => {
         if (!selectedProduct) return;
+
+        cfgError.classList.add('d-none');
+        cfgError.textContent = '';
+
+        const typeId = Number(selectedProduct.productTypeId);
 
         const qty = Math.max(1, Number(cfgQty.value || 1));
         const sizeId = Number(cfgSize.value);
         const milkTypeId = Number(cfgMilk.value);
 
+        // Para TODO lo que NO es food, pedimos Size + Milk (como definiste)
         if (!sizeId || !milkTypeId) {
             cfgError.classList.remove('d-none');
             cfgError.textContent = "Selecciona Size y MilkType.";
             return;
         }
 
+        // Extras según tipo
+        const temperatureId = (typeId === TYPE_TEMP) ? Number(cfgTemp?.value) : null;
+        const syrupId = (typeId === TYPE_SYRUP) ? Number(cfgSyrup?.value) : null;
+        const hasWhippedCream = (typeId === TYPE_WHIP) ? !!cfgWhip?.checked : false;
+
+        // Validaciones obligatorias
+        if (typeId === TYPE_TEMP && (!temperatureId || Number.isNaN(temperatureId))) {
+            cfgError.classList.remove('d-none');
+            cfgError.textContent = "Selecciona una Temperatura.";
+            return;
+        }
+
+        if (typeId === TYPE_SYRUP && (!syrupId || Number.isNaN(syrupId))) {
+            cfgError.classList.remove('d-none');
+            cfgError.textContent = "Selecciona un Jarabe.";
+            return;
+        }
+
         const sizeOpt = cfgSize.options[cfgSize.selectedIndex];
         const milkOpt = cfgMilk.options[cfgMilk.selectedIndex];
 
+        const tempOpt = (typeId === TYPE_TEMP && cfgTemp) ? cfgTemp.options[cfgTemp.selectedIndex] : null;
+        const syrupOpt = (typeId === TYPE_SYRUP && cfgSyrup) ? cfgSyrup.options[cfgSyrup.selectedIndex] : null;
+
         const sizeDelta = getSelectedDelta(cfgSize);
         const milkDelta = getSelectedDelta(cfgMilk);
-        const unitPrice = Number(selectedProduct.basePrice) + sizeDelta + milkDelta;
+
+        // Precio unitario base
+        let unitPrice = Number(selectedProduct.basePrice) + sizeDelta + milkDelta;
+
+        // Jarabe puede sumar precio (si tus options lo traen en data-delta)
+        if (typeId === TYPE_SYRUP) {
+            unitPrice += getSelectedDelta(cfgSyrup);
+        }
+
+        // Crema batida (si tiene costo fijo; si no, WHIPPED_CREAM_PRICE = 0)
+        if (typeId === TYPE_WHIP && hasWhippedCream) {
+            unitPrice += WHIPPED_CREAM_PRICE;
+        }
 
         addToCart({
             productId: selectedProduct.productId,
             barCode: selectedProduct.barCode,
+            productTypeId: typeId,
             name: selectedProduct.name,
             basePrice: Number(selectedProduct.basePrice),
 
@@ -345,6 +491,15 @@
             milkTypeId,
             milkName: milkOpt?.textContent?.split(' (')[0] || 'Milk',
             milkDelta,
+
+            // Extras guardados para mostrar y para checkout
+            temperatureId,
+            tempName: tempOpt ? (tempOpt.textContent || 'Temp') : 'N/A',
+
+            syrupId,
+            syrupName: syrupOpt ? (syrupOpt.textContent || 'Syrup') : 'N/A',
+
+            hasWhippedCream,
 
             unitPrice,
             qty
@@ -425,7 +580,10 @@
                 productId: i.productId,
                 quantity: i.qty,
                 sizeId: i.sizeId,
-                milkTypeId: i.milkTypeId
+                milkTypeId: i.milkTypeId,
+                temperatureId: i.temperatureId,
+                syrupId: i.syrupId,
+                hasWhippedCream: i.hasWhippedCream
             }))
         };
 

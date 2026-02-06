@@ -1,0 +1,21 @@
+services:
+  db-cafeteria:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=TuPasswordFuerte123!
+      - TZ=America/Mexico_City
+    ports:
+      - "1433:1433"
+
+  app-cafeteria:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - TZ=America/Mexico_City
+      - ConnectionStrings__DefaultConnection=Server=db-cafeteria;Database=MiBaseDatosLocal;User Id=sa;Password=TuPasswordFuerte123!;TrustServerCertificate=True
+    depends_on:
+      - db-cafeteria
+    ports:
+      - "8080:8080"

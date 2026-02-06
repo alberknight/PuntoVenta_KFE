@@ -36,5 +36,6 @@ namespace cafeteriaKFE.Controllers
             var vm = await _dashboard.GetDashboardAsync();
             return View(vm); // Views/Inicio/Dashboard.cshtml
         }
+
     }
 }

@@ -63,7 +63,7 @@ public sealed class ProductService : IProductService
         if (await _repo.ExistsBarCodeAsync(dto.BarCode))
         {
             return IdentityResult.Failed(
-                new IdentityError { Description = "Ya existe un producto con ese código de barras." }
+                new IdentityError { Description = "Ya existe un producto con ese cï¿½digo de barras." }
             );
         }
 
@@ -101,7 +101,7 @@ public sealed class ProductService : IProductService
         if (await _repo.ExistsBarCodeAsync(dto.BarCode, dto.ProductId))
         {
             return IdentityResult.Failed(
-                new IdentityError { Description = "Ya existe otro producto con ese código de barras." }
+                new IdentityError { Description = "Ya existe otro producto con ese cï¿½digo de barras." }
             );
         }
 
@@ -121,7 +121,7 @@ public sealed class ProductService : IProductService
     public async Task<IdentityResult> SoftDeleteAsync(int id)
     {
         if (id <= 0)
-            return IdentityResult.Failed(new IdentityError { Description = "Id inválido." });
+            return IdentityResult.Failed(new IdentityError { Description = "Id invï¿½lido." });
 
         var product = await _repo.GetByIdAsync(id);
         if (product is null)

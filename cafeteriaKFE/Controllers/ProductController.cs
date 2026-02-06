@@ -3,6 +3,7 @@ using cafeteriaKFE.Core.Products.Response;
 using cafeteriaKFE.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using cafeteriaKFE.Core.Home.Request; // ADDED
 
 namespace cafeteriaKFE.Controllers;
 
@@ -10,10 +11,12 @@ namespace cafeteriaKFE.Controllers;
 public sealed class ProductController : Controller
 {
     private readonly IProductService _service;
+    private readonly IHomeService _homeService;
 
-    public ProductController(IProductService service)
+    public ProductController(IProductService service, IHomeService homeService)
     {
         _service = service;
+        _homeService = homeService;
     }
 
     // GET: /Product
@@ -125,9 +128,16 @@ public sealed class ProductController : Controller
     // GET: /Product/Reports/Sales
     [HttpGet]
     [Route("Product/Reports/Sales")] // Explicitly define the route
-    public IActionResult Sales()
+    public async Task<IActionResult> Sales(string mode, DateTime? from, DateTime? to)
     {
-        return View("Reports/Sales");
+        var request = new ProductSalesReportRequest
+        {
+            Mode = mode,
+            From = from,
+            To = to
+        };
+        var model = await _homeService.GetProductsSalesReportAsync(request);
+        return View("Reports/Sales", model);
     }
 
     private static readonly (int Id, string Name)[] ProductTypes =

@@ -1,0 +1,13 @@
+He revisado la implementación de `DashboardRepository.cs` y las consultas LINQ para `GetSalesTotalAsync`, `GetTicketsCountAsync`, `GetProductsSoldAsync` y `GetTopProductsAllTimeAsync` parecen correctas desde el punto de vista del código.
+
+El problema de que no aparezcan datos en tu `Dashboard.cshtml` sugiere que las consultas están devolviendo valores de 0 o listas vacías, en lugar de un `NullReferenceException` en el modelo completo. Esto puede deberse a:
+
+1.  **Falta de datos en la base de datos:** Si no hay registros de ventas o productos para el día actual o en general, las consultas devolverán cero.
+2.  **Problemas con el rango de fechas:** La lógica de `DateTime.Today` en `HomeService` compara con las fechas de la base de datos. Si hay una discrepancia en las zonas horarias (por ejemplo, la base de datos guarda UTC y el servidor usa una zona horaria local), podría hacer que no se encuentren datos para "hoy".
+3.  **Registros marcados como borrados:** Las consultas filtran por `!o.Deleted`, `!od.Deleted`, `!p.Deleted`. Si los registros están marcados como borrados lógicamente, no aparecerán.
+
+Para diagnosticar esto, ¿podrías confirmarme si:
+*   Tienes **ventas registradas en tu base de datos para la fecha actual** (hoy)?
+*   Has verificado que hay datos en las tablas `Orders`, `OrderDetails` y `Products` y que no están todos marcados como `Deleted`?
+
+Con esa información, podremos acotar la causa del problema.

@@ -1,0 +1,3 @@
+He actualizado la lógica de depuración. Ahora, cuando navegues a la URL del dashboard (`/Home/Dashboard`), el JSON que se muestre incluirá también las fechas exactas `FromDate` y `ToDate` que se están usando para filtrar los datos.
+
+Por favor, vuelve a ejecutar la aplicación, navega al dashboard y copia y pega aquí el *contenido completo* de la respuesta JSON actualizada. Esto me permitirá ver si las fechas de filtro son correctas y si los valores de los datos siguen siendo cero o vacíos.

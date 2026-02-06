@@ -1,5 +1,6 @@
-﻿@{
-    ViewData["Title"] = "Reporte de Productos";
+﻿@model cafeteriaKFE.Core.Home.Request.ProductSalesReportViewRequest
+@{
+    ViewData["Title"] = "Sales";
 }
 
 <div class="container py-4">
@@ -16,30 +17,30 @@
 
     <div class="card shadow-sm mb-3">
         <div class="card-body">
-            <form method="get" class="row g-2 align-items-end">
+            <form method="get" asp-controller="Product" asp-action="Sales" class="row g-2 align-items-end">
                 <div class="col-12 col-md-3">
                     <label class="form-label">Tipo</label>
                     <select name="mode" class="form-select">
-                        <option value="top">Más vendidos</option>
-                        <option value="low">Menos vendidos</option>
+                        <option value="top" selected="@(Model.Mode == "top")">Más vendidos</option>
+                        <option value="low" selected="@(Model.Mode == "low")">Menos vendidos</option>
                     </select>
                 </div>
 
                 <div class="col-12 col-md-3">
                     <label class="form-label">Desde</label>
-                    <input name="from" type="date" class="form-control" />
+                    <input name="from" type="date" class="form-control"
+                           value="@(Model.From?.ToString("yyyy-MM-dd"))" />
                 </div>
 
                 <div class="col-12 col-md-3">
                     <label class="form-label">Hasta</label>
-                    <input name="to" type="date" class="form-control" />
+                    <input name="to" type="date" class="form-control"
+                           value="@(Model.To?.ToString("yyyy-MM-dd"))" />
                 </div>
 
                 <div class="col-12 col-md-3 d-flex gap-2">
                     <button class="btn btn-primary w-100" type="submit">Aplicar</button>
-                    <a asp-controller="Reports" asp-action="Productos" class="btn btn-outline-secondary w-100">
-                        Limpiar
-                    </a>
+                    <a href="/Product/Reports/Sales" class="btn btn-outline-secondary w-100">Limpiar</a>
                 </div>
             </form>
         </div>
@@ -48,7 +49,9 @@
     <div class="card shadow-sm">
         <div class="card-header bg-white d-flex justify-content-between align-items-center">
             <strong>Resultados</strong>
-            <span class="text-muted small">placeholder</span>
+            <span class="text-muted small">
+                @(Model.Mode == "low" ? "Menos vendidos" : "Más vendidos")
+            </span>
         </div>
 
         <div class="table-responsive">
@@ -61,18 +64,31 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- Placeholder: aquí renderizas tu lista -->
-                    <tr class="text-muted">
-                        <td colspan="3" class="text-center py-4">
-                            Aplica filtros para ver resultados.
-                        </td>
-                    </tr>
+                    @if (Model.Items == null || Model.Items.Count == 0)
+                    {
+                        <tr class="text-muted">
+                            <td colspan="3" class="text-center py-4">
+                                No hay datos para ese rango.
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        foreach (var it in Model.Items)
+                        {
+                            <tr>
+                                <td>@it.Name</td>
+                                <td class="text-end">@it.QuantitySold</td>
+                                <td class="text-end">@it.TotalSold.ToString("C", new System.Globalization.CultureInfo("es-MX"))</td>
+                            </tr>
+                        }
+                    }
                 </tbody>
             </table>
         </div>
 
         <div class="card-footer bg-white text-muted small">
-            Tip: “Menos vendidos” es útil para detectar productos estancados.
+            Tip: “Menos vendidos” sirve para detectar productos estancados.
         </div>
     </div>
 </div>

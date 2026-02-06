@@ -12,10 +12,9 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["cafeteriaKFE/cafeteriaKFE.csproj", "cafeteriaKFE/"]
-RUN dotnet restore "./cafeteriaKFE/cafeteriaKFE.csproj"
+COPY ["cafeteriaKFE.csproj", "./"]
+RUN dotnet restore "./cafeteriaKFE.csproj"
 COPY . .
-WORKDIR "/src/cafeteriaKFE"
 RUN dotnet build "./cafeteriaKFE.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # Esta fase se usa para publicar el proyecto de servicio que se copiará en la fase final.
@@ -27,4 +26,5 @@ RUN dotnet publish "./cafeteriaKFE.csproj" -c $BUILD_CONFIGURATION -o /app/publi
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+ENV TZ=America/Mexico_City
 ENTRYPOINT ["dotnet", "cafeteriaKFE.dll"]

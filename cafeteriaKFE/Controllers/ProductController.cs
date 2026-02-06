@@ -121,6 +121,15 @@ public sealed class ProductController : Controller
         TempData["Success"] = "Producto eliminado correctamente.";
         return RedirectToAction("All", "Product");
     }
+
+    // GET: /Product/Reports/Sales
+    [HttpGet]
+    [Route("Product/Reports/Sales")] // Explicitly define the route
+    public IActionResult Sales()
+    {
+        return View("Reports/Sales");
+    }
+
     private static readonly (int Id, string Name)[] ProductTypes =
 {
     (2, "Temperatures"),   // ajusta el texto a como lo quieras mostrar

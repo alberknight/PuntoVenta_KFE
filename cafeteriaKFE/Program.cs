@@ -4,6 +4,7 @@ using cafeteriaKFE.Repository;
 using cafeteriaKFE.Repository.Catalogs;
 using cafeteriaKFE.Repository.Orders;
 using cafeteriaKFE.Repository.Products;
+using cafeteriaKFE.Repository.Home;
 using cafeteriaKFE.Services;
 using Microsoft.AspNetCore.Authorization; // Added for DataProtection
 using Microsoft.AspNetCore.DataProtection;
@@ -26,6 +27,8 @@ builder.Services.AddScoped<IPosCatalogRepository, PosCatalogRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<IDashboardRepository, DashboardRepository>();
+builder.Services.AddScoped<IHomeService, HomeService>();
 
 
 // Configure Data Protection to persist keys to the file system

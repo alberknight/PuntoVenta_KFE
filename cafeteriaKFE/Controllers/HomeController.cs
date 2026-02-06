@@ -1,16 +1,22 @@
 ﻿using cafeteriaKFE.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using cafeteriaKFE.Services;
 
 namespace cafeteriaKFE.Controllers
 {
     [Authorize(Roles = "Admin")]
     public class HomeController : Controller
     {
+        private readonly IHomeService _dashboard;
         /// <summary>
         /// Punto de entrada después del login.
         /// Redirige según rol.
         /// </summary>
+        public HomeController(IHomeService dashboard)
+        {
+            _dashboard = dashboard;
+        }
         public IActionResult Index()
         {
             if (User.IsInRole("Admin"))
@@ -24,15 +30,11 @@ namespace cafeteriaKFE.Controllers
         /// Dashboard principal (solo Admin)
         /// </summary>
         [Authorize(Roles = "Admin")]
-        public IActionResult Dashboard()
+        [HttpGet]
+        public async Task<IActionResult> Dashboard()
         {
-            // Más adelante aquí cargarás:
-            // - ventas del día
-            // - KPIs
-            // - gráficas
-            // - alertas
-
-            return View();
+            var vm = await _dashboard.GetDashboardAsync();
+            return View(vm); // Views/Inicio/Dashboard.cshtml
         }
     }
 }

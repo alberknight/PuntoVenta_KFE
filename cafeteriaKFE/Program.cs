@@ -66,12 +66,12 @@ builder.Services.AddControllersWithViews();
 // This requires all endpoints to be authorized by default.
 // We can then opt-out of authorization for specific endpoints
 // like Login, Register, etc., by using the [AllowAnonymous] attribute.
-/*builder.Services.AddAuthorization(options =>
+builder.Services.AddAuthorization(options =>
 {
     options.FallbackPolicy = new AuthorizationPolicyBuilder()
         .RequireAuthenticatedUser()
         .Build();
-});*/
+});
 
 var app = builder.Build();
 

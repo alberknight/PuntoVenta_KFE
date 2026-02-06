@@ -1,5 +1,0 @@
-He modificado la acción `Dashboard()` en `HomeController.cs` para que, en lugar de mostrar la vista, devuelva los datos directamente en formato JSON.
-
-Por favor, ejecuta la aplicación y navega a la URL que normalmente te llevaría al dashboard (probablemente `/Home/Dashboard`). Deberías ver una página con texto JSON.
-
-Copia y pega aquí el contenido completo de esa respuesta JSON. Esto me ayudará a ver exactamente qué valores están devolviendo las consultas a la base de datos y a identificar por qué no se muestran en el dashboard.

@@ -15,6 +15,7 @@ namespace cafeteriaKFE.Repository.Home
             bool least,
             int take);
         Task<List<TopProductItem>> GetTopProductsAllTimeAsync(int top);
+        Task<List<TopProductItem>> GetProductsSoldTodayForChartAsync(DateTime from, DateTime to); // New method
     }
     public class DashboardRepository : IDashboardRepository
     {
@@ -135,5 +136,23 @@ namespace cafeteriaKFE.Repository.Home
             return ordered.Take(take).ToList();
         }
 
+        public async Task<List<TopProductItem>> GetProductsSoldTodayForChartAsync(DateTime fromDate, DateTime to)
+        {
+            return await (
+                from od in _db.OrderDetails.AsNoTracking()
+                join p in _db.Products.AsNoTracking() on od.ProductId equals p.ProductId
+                join o in _db.Orders.AsNoTracking() on od.OrderId equals o.OrderId
+                where !od.Deleted && !p.Deleted && !o.Deleted
+                   && o.CreatedAt >= fromDate && o.CreatedAt < to // Filtrar por fecha
+                group od by new { p.ProductId, p.Name } into g
+                orderby g.Sum(x => x.Quantity) descending
+                select new TopProductItem
+                {
+                    ProductId = g.Key.ProductId,
+                    Name = g.Key.Name,
+                    QuantitySold = g.Sum(x => x.Quantity)
+                }
+            ).ToListAsync(); // Sin Take(top)
+        }
     }
 }

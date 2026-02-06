@@ -8,11 +8,13 @@
         public int ProductsSoldToday { get; set; }       // sum OrderDetails.Quantity hoy
 
         public List<TopProductItem> TopProductsAllTime { get; set; } = [];
+        public List<TopProductItem> ProductsSoldTodayForChart { get; set; } = []; // Added for chart
     }
     public class TopProductItem
     {
         public int ProductId { get; set; }
         public string Name { get; set; } = null!;
         public int QuantitySold { get; set; }
+        public decimal TotalSold { get; set; }
     }
 }

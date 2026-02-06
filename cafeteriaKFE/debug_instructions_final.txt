@@ -1,3 +1,0 @@
-He realizado otra modificación en la lógica de depuración. Ahora, cuando navegues a la URL del dashboard (`/Home/Dashboard`), en lugar de JSON vacío, deberías ver una **cadena de texto simple** con los valores de depuración.
-
-Por favor, vuelve a ejecutar la aplicación, navega al dashboard y copia y pega aquí el *contenido completo* de la respuesta de texto. Esto me ayudará a descartar cualquier problema de serialización y a confirmar qué valores están regresando exactamente desde las consultas a la base de datos.

@@ -1,12 +1,14 @@
-using Microsoft.AspNetCore.Mvc;
-using cafeteriaKFE.Models;
-using System.Threading.Tasks;
-using cafeteriaKFE.Services;
 using cafeteriaKFE.Core.Users.Request; // Added for request models
 using cafeteriaKFE.Core.Users.Response; // Added for response models
+using cafeteriaKFE.Models;
+using cafeteriaKFE.Services;
+using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace cafeteriaKFE.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class UserController : Controller
     {
         private readonly IUserService _userService;

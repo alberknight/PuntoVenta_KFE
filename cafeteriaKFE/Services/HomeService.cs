@@ -20,12 +20,20 @@ namespace cafeteriaKFE.Services
         public async Task<DashboardViewRequest> GetDashboardAsync()
         {
             // Hoy (hora del servidor). Si tu BD guarda UTC, cambia a UtcNow.Date.
-            var from = DateTime.UtcNow.Date;
-            var to = from.AddDays(1);
+            var tiempo = DateTime.UtcNow.Date.ToUniversalTime(); // Keep user's time calculation for main KPIs
+            var from = tiempo.AddDays(-3);
+            var to = tiempo.AddDays(3);
 
             var sales = await _repo.GetSalesTotalAsync(from, to);
             var tickets = await _repo.GetTicketsCountAsync(from, to);
             var productsSold = await _repo.GetProductsSoldAsync(from, to);
+
+            // Calculate dates specifically for "today's" chart based on user's request
+            var tiempoChart = DateTime.UtcNow.Date.ToUniversalTime();
+            var fromChart = tiempoChart.AddDays(-2);
+            var toChart = tiempoChart.AddDays(2);
+            var productsSoldForChart = await _repo.GetProductsSoldTodayForChartAsync(fromChart, toChart);
+
 
             return new DashboardViewRequest
             {
@@ -33,7 +41,8 @@ namespace cafeteriaKFE.Services
                 TicketsToday = tickets,
                 AvgTicketToday = tickets > 0 ? Math.Round(sales / tickets, 2) : 0m,
                 ProductsSoldToday = productsSold,
-                TopProductsAllTime = await _repo.GetTopProductsAllTimeAsync(3)
+                TopProductsAllTime = await _repo.GetTopProductsAllTimeAsync(3),
+                ProductsSoldTodayForChart = productsSoldForChart // Populated here
             };
         }
         public async Task<ProductSalesReportViewRequest> GetProductsSalesReportAsync(ProductSalesReportRequest req)

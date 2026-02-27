@@ -64,7 +64,6 @@ builder.Services.AddControllersWithViews();
 
 // Set up a fallback authorization policy.
 // This requires all endpoints to be authorized by default.
-// We can then opt-out of authorization for specific endpoints
 // like Login, Register, etc., by using the [AllowAnonymous] attribute.
 builder.Services.AddAuthorization(options =>
 {
@@ -75,74 +74,8 @@ builder.Services.AddAuthorization(options =>
 
 var app = builder.Build();
 
-// User and Role Seeding Logic
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    try
-    {
-        var userManager = services.GetRequiredService<UserManager<User>>();
-        var roleManager = services.GetRequiredService<RoleManager<IdentityRole<long>>>();
-        var logger = services.GetRequiredService<ILogger<Program>>();
 
-        // Define default roles
-        string[] roleNames = { "Admin", "Customer" };
-        
-        foreach (var roleName in roleNames)
-        {
-            var roleExist = await roleManager.RoleExistsAsync(roleName);
-            if (!roleExist)
-            {
-                // Create the roles and seed them to the database
-                await roleManager.CreateAsync(new IdentityRole<long>(roleName));
-                logger.LogInformation($"Role '{roleName}' created.");
-            }
-        }
-
-        // Seed a default admin user
-        var adminEmail = "admin@cafeteria.com";
-        var adminPassword = "Password123!";
-
-        var adminUser = await userManager.FindByEmailAsync(adminEmail);
-        if (adminUser == null)
-        {
-            adminUser = new User
-            {
-                UserName = adminEmail,
-                Email = adminEmail,
-                Name = "Admin",
-                LastName = "User",
-                EmailConfirmed = true,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow,
-                Deleted = false
-            };
-            var result = await userManager.CreateAsync(adminUser, adminPassword);
-            if (result.Succeeded)
-            {
-                // Assign the 'Admin' role to the admin user
-                await userManager.AddToRoleAsync(adminUser, "Admin");
-                logger.LogInformation("Default admin user created and assigned to 'Admin' role.");
-            }
-            else
-            {
-                // Log errors if user creation fails
-                foreach (var error in result.Errors)
-                {
-                    logger.LogError($"Error creating default admin user: {error.Description}");
-                }
-            }
-        }
-    }
-    catch (Exception ex)
-    {
-        var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "An error occurred while seeding the database.");
-    }
-}
-// End User Seeding Logic
-
-// Configure the HTTP request pipeline.
+// Configure the HTTP request p ipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");

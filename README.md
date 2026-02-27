@@ -126,11 +126,3 @@ A continuación, te mostramos algunas vistas de la aplicación en funcionamiento
 ### Gestión de Productos
 ![Interfaz de gestión de productos](cafeteriaKFE/images/products-management.png)
 *Administración de productos, categorías y precios*
-
-## Contribuciones
-
-¡Las contribuciones son bienvenidas! No dudes en bifurcar el repositorio (fork), realizar tus cambios y enviar una solicitud de extracción (pull request).
-
-## Licencia
-
-Este proyecto está bajo la Licencia [MIT](LICENSE) - consulta el archivo `LICENSE` para más detalles.

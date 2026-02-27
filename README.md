@@ -112,19 +112,19 @@ Sigue estas instrucciones para obtener una copia del proyecto y ponerlo en march
 A continuación, te mostramos algunas vistas de la aplicación en funcionamiento:
 
 ### Página de Inicio de Sesión
-![Página de inicio de sesión de Cafetería KFE](images/login-page.png)
+![Página de inicio de sesión de Cafetería KFE](cafeteriaKFE/images/login-page.png)
 *Interfaz de autenticación para acceder al sistema*
 
 ### Interfaz de Punto de Venta (POS)
-![Interfaz de ventas principal de Cafetería KFE](images/pos-interface.png)
+![Interfaz de ventas principal de Cafetería KFE](cafeteriaKFE/images/pos-interface.png)
 *Pantalla principal para realizar ventas y gestionar pedidos*
 
 ### Panel de Administración
-![Panel de administración con gráficos](images/admin-dashboard.png)
+![Panel de administración con gráficos](cafeteriaKFE/images/admin-dashboard.png)
 *Vista general con métricas y estadísticas del negocio*
 
 ### Gestión de Productos
-![Interfaz de gestión de productos](images/products-management.png)
+![Interfaz de gestión de productos](cafeteriaKFE/images/products-management.png)
 *Administración de productos, categorías y precios*
 
 ## Contribuciones
